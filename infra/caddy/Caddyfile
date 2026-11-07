@@ -1,0 +1,14 @@
+# Reverse proxy z automatycznym HTTPS. W trybie produkcyjnym ustaw w .env:
+#   FINDINI_ENV=prod, FINDINI_PUBLIC_BASE_URL=https://twoja-domena, FINDINI_TRUST_PROXY_HEADERS=true,
+#   FINDINI_FORWARDED_ALLOW_IPS=*, API_BIND=127.0.0.1 (API niedostępne z zewnątrz bez TLS)
+{$FINDINI_DOMAIN} {
+	encode gzip
+	request_body {
+		max_size 12MB
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+	reverse_proxy api:8080
+}

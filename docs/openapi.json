@@ -1,0 +1,2897 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Findini API",
+        "description": "API aplikacji Findini \u2014 zg\u0142aszanie znalezionych przedmiot\u00f3w i odnajdywanie zgub (pilota\u017c: Krak\u00f3w).",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/v1/sessions": {
+            "post": {
+                "tags": [
+                    "sesje"
+                ],
+                "summary": "Create Session",
+                "operationId": "create_session_v1_sessions_post",
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": true,
+                                    "type": "object",
+                                    "title": "Response Create Session V1 Sessions Post"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/sessions/recover": {
+            "post": {
+                "tags": [
+                    "sesje"
+                ],
+                "summary": "Recover",
+                "operationId": "recover_v1_sessions_recover_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecoverIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": true,
+                                    "type": "object",
+                                    "title": "Response Recover V1 Sessions Recover Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/sessions/current": {
+            "delete": {
+                "tags": [
+                    "sesje"
+                ],
+                "summary": "Logout",
+                "operationId": "logout_v1_sessions_current_delete",
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    }
+                }
+            }
+        },
+        "/v1/me": {
+            "get": {
+                "tags": [
+                    "sesje"
+                ],
+                "summary": "Me",
+                "operationId": "me_v1_me_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": true,
+                                    "type": "object",
+                                    "title": "Response Me V1 Me Get"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "sesje"
+                ],
+                "summary": "Delete Me",
+                "description": "Usuwa wszystkie dane go\u015bcia: zg\u0142oszenia, zdj\u0119cia (pliki), roszczenia, wiadomo\u015bci, sesje.",
+                "operationId": "delete_me_v1_me_delete",
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    }
+                }
+            }
+        },
+        "/v1/me/recovery-code": {
+            "post": {
+                "tags": [
+                    "sesje"
+                ],
+                "summary": "Make Recovery Code",
+                "operationId": "make_recovery_code_v1_me_recovery_code_post",
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": true,
+                                    "type": "object",
+                                    "title": "Response Make Recovery Code V1 Me Recovery Code Post"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/me/reports": {
+            "get": {
+                "tags": [
+                    "sesje"
+                ],
+                "summary": "My Reports",
+                "operationId": "my_reports_v1_me_reports_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": true,
+                                    "type": "object",
+                                    "title": "Response My Reports V1 Me Reports Get"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/me/cases": {
+            "get": {
+                "tags": [
+                    "sesje"
+                ],
+                "summary": "My Cases",
+                "description": "Sprawy (roszczenia) w obu rolach: jako znalazca i jako osoba odbieraj\u0105ca.",
+                "operationId": "my_cases_v1_me_cases_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": true,
+                                    "type": "object",
+                                    "title": "Response My Cases V1 Me Cases Get"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/me/updates": {
+            "get": {
+                "tags": [
+                    "sesje"
+                ],
+                "summary": "Updates",
+                "description": "Lekki endpoint dla okresowego sprawdzania (WorkManager) \u2014 liczniki, bez tre\u015bci prywatnych.",
+                "operationId": "updates_v1_me_updates_get",
+                "parameters": [
+                    {
+                        "name": "since",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Since"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Updates V1 Me Updates Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports": {
+            "get": {
+                "tags": [
+                    "zg\u0142oszenia"
+                ],
+                "summary": "Search Reports",
+                "operationId": "search_reports_v1_reports_get",
+                "parameters": [
+                    {
+                        "name": "kind",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "enum": [
+                                        "lost",
+                                        "found"
+                                    ],
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Kind"
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "maxLength": 32
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Category"
+                        }
+                    },
+                    {
+                        "name": "subtype",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "maxLength": 40
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Subtype"
+                        }
+                    },
+                    {
+                        "name": "colors",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "maxLength": 100
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "lista po przecinku",
+                            "title": "Colors"
+                        },
+                        "description": "lista po przecinku"
+                    },
+                    {
+                        "name": "brand",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "maxLength": 40
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Brand"
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "maxLength": 120
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Q"
+                        }
+                    },
+                    {
+                        "name": "lat",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "number",
+                                    "maximum": 90,
+                                    "minimum": -90
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Lat"
+                        }
+                    },
+                    {
+                        "name": "lon",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "number",
+                                    "maximum": 180,
+                                    "minimum": -180
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Lon"
+                        }
+                    },
+                    {
+                        "name": "radius_m",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer",
+                                    "maximum": 25000,
+                                    "minimum": 100
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Radius M"
+                        }
+                    },
+                    {
+                        "name": "bbox",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "maxLength": 120
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Bbox"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Date From"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Date To"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "enum": [
+                                "relevance",
+                                "newest",
+                                "nearest"
+                            ],
+                            "type": "string",
+                            "default": "relevance",
+                            "title": "Sort"
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "maxLength": 300
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Cursor"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 50,
+                            "minimum": 1,
+                            "default": 20,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Search Reports V1 Reports Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "zg\u0142oszenia"
+                ],
+                "summary": "Create Report",
+                "operationId": "create_report_v1_reports_post",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Create Report V1 Reports Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports/areas": {
+            "get": {
+                "tags": [
+                    "zg\u0142oszenia"
+                ],
+                "summary": "Report Areas",
+                "operationId": "report_areas_v1_reports_areas_get",
+                "parameters": [
+                    {
+                        "name": "bbox",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 120,
+                            "title": "Bbox"
+                        }
+                    },
+                    {
+                        "name": "kind",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "enum": [
+                                        "lost",
+                                        "found"
+                                    ],
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Kind"
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "maxLength": 32
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Category"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Date From"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Date To"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Report Areas V1 Reports Areas Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports/{report_id}": {
+            "get": {
+                "tags": [
+                    "zg\u0142oszenia"
+                ],
+                "summary": "Get Report",
+                "operationId": "get_report_v1_reports__report_id__get",
+                "parameters": [
+                    {
+                        "name": "report_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Report Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Get Report V1 Reports  Report Id  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "zg\u0142oszenia"
+                ],
+                "summary": "Update Report",
+                "operationId": "update_report_v1_reports__report_id__patch",
+                "parameters": [
+                    {
+                        "name": "report_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Report Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReportUpdate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Update Report V1 Reports  Report Id  Patch"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "zg\u0142oszenia"
+                ],
+                "summary": "Withdraw Report",
+                "operationId": "withdraw_report_v1_reports__report_id__delete",
+                "parameters": [
+                    {
+                        "name": "report_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Report Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports/{report_id}/resolve": {
+            "post": {
+                "tags": [
+                    "zg\u0142oszenia"
+                ],
+                "summary": "Resolve Report",
+                "description": "Zamkni\u0119cie poza procesem roszcze\u0144: \u201eodnalaz\u0142em\u201d (zguba) lub \u201eoddane do biura / zwr\u00f3cone poza aplikacj\u0105\u201d.",
+                "operationId": "resolve_report_v1_reports__report_id__resolve_post",
+                "parameters": [
+                    {
+                        "name": "report_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Report Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResolveIn"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Resolve Report V1 Reports  Report Id  Resolve Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports/{report_id}/renew": {
+            "post": {
+                "tags": [
+                    "zg\u0142oszenia"
+                ],
+                "summary": "Renew Report",
+                "operationId": "renew_report_v1_reports__report_id__renew_post",
+                "parameters": [
+                    {
+                        "name": "report_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Report Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Renew Report V1 Reports  Report Id  Renew Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports/{report_id}/matches": {
+            "get": {
+                "tags": [
+                    "zg\u0142oszenia"
+                ],
+                "summary": "Report Matches",
+                "operationId": "report_matches_v1_reports__report_id__matches_get",
+                "parameters": [
+                    {
+                        "name": "report_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Report Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Report Matches V1 Reports  Report Id  Matches Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports/{report_id}/claims": {
+            "get": {
+                "tags": [
+                    "zg\u0142oszenia"
+                ],
+                "summary": "Report Claims",
+                "operationId": "report_claims_v1_reports__report_id__claims_get",
+                "parameters": [
+                    {
+                        "name": "report_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Report Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Report Claims V1 Reports  Report Id  Claims Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "roszczenia"
+                ],
+                "summary": "Create Claim",
+                "operationId": "create_claim_v1_reports__report_id__claims_post",
+                "parameters": [
+                    {
+                        "name": "report_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Report Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ClaimCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Create Claim V1 Reports  Report Id  Claims Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports/{report_id}/claim-form": {
+            "get": {
+                "tags": [
+                    "zg\u0142oszenia"
+                ],
+                "summary": "Claim Form",
+                "operationId": "claim_form_v1_reports__report_id__claim_form_get",
+                "parameters": [
+                    {
+                        "name": "report_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Report Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Claim Form V1 Reports  Report Id  Claim Form Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/photos": {
+            "post": {
+                "tags": [
+                    "zdj\u0119cia"
+                ],
+                "summary": "Upload Photo",
+                "operationId": "upload_photo_v1_photos_post",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_upload_photo_v1_photos_post"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": true,
+                                    "type": "object",
+                                    "title": "Response Upload Photo V1 Photos Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/photos/{photo_id}": {
+            "get": {
+                "tags": [
+                    "zdj\u0119cia"
+                ],
+                "summary": "Get Photo",
+                "operationId": "get_photo_v1_photos__photo_id__get",
+                "parameters": [
+                    {
+                        "name": "photo_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Photo Id"
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "enum": [
+                                "full",
+                                "thumb"
+                            ],
+                            "type": "string",
+                            "default": "full",
+                            "title": "Size"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "zdj\u0119cia"
+                ],
+                "summary": "Delete Photo",
+                "operationId": "delete_photo_v1_photos__photo_id__delete",
+                "parameters": [
+                    {
+                        "name": "photo_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Photo Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/search/by-photo": {
+            "post": {
+                "tags": [
+                    "zdj\u0119cia"
+                ],
+                "summary": "Search By Photo",
+                "description": "Zdj\u0119cie zapytania jest analizowane w pami\u0119ci i NIE jest zapisywane.",
+                "operationId": "search_by_photo_v1_search_by_photo_post",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_search_by_photo_v1_search_by_photo_post"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": true,
+                                    "type": "object",
+                                    "title": "Response Search By Photo V1 Search By Photo Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/claims/{claim_id}": {
+            "get": {
+                "tags": [
+                    "roszczenia"
+                ],
+                "summary": "Get Claim",
+                "operationId": "get_claim_v1_claims__claim_id__get",
+                "parameters": [
+                    {
+                        "name": "claim_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Claim Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Get Claim V1 Claims  Claim Id  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/claims/{claim_id}/accept": {
+            "post": {
+                "tags": [
+                    "roszczenia"
+                ],
+                "summary": "Accept",
+                "operationId": "accept_v1_claims__claim_id__accept_post",
+                "parameters": [
+                    {
+                        "name": "claim_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Claim Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/DecisionIn"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "title": "Body"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Accept V1 Claims  Claim Id  Accept Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/claims/{claim_id}/reject": {
+            "post": {
+                "tags": [
+                    "roszczenia"
+                ],
+                "summary": "Reject",
+                "operationId": "reject_v1_claims__claim_id__reject_post",
+                "parameters": [
+                    {
+                        "name": "claim_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Claim Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/DecisionIn"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "title": "Body"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Reject V1 Claims  Claim Id  Reject Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/claims/{claim_id}/withdraw": {
+            "post": {
+                "tags": [
+                    "roszczenia"
+                ],
+                "summary": "Withdraw",
+                "operationId": "withdraw_v1_claims__claim_id__withdraw_post",
+                "parameters": [
+                    {
+                        "name": "claim_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Claim Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Withdraw V1 Claims  Claim Id  Withdraw Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/claims/{claim_id}/handover": {
+            "post": {
+                "tags": [
+                    "roszczenia"
+                ],
+                "summary": "Handover",
+                "operationId": "handover_v1_claims__claim_id__handover_post",
+                "parameters": [
+                    {
+                        "name": "claim_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Claim Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/HandoverIn"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Handover V1 Claims  Claim Id  Handover Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/claims/{claim_id}/confirm-received": {
+            "post": {
+                "tags": [
+                    "roszczenia"
+                ],
+                "summary": "Confirm Received",
+                "operationId": "confirm_received_v1_claims__claim_id__confirm_received_post",
+                "parameters": [
+                    {
+                        "name": "claim_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Claim Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Confirm Received V1 Claims  Claim Id  Confirm Received Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/claims/{claim_id}/thanks": {
+            "post": {
+                "tags": [
+                    "roszczenia"
+                ],
+                "summary": "Thanks",
+                "operationId": "thanks_v1_claims__claim_id__thanks_post",
+                "parameters": [
+                    {
+                        "name": "claim_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Claim Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Thanks V1 Claims  Claim Id  Thanks Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/claims/{claim_id}/block": {
+            "post": {
+                "tags": [
+                    "roszczenia"
+                ],
+                "summary": "Block",
+                "operationId": "block_v1_claims__claim_id__block_post",
+                "parameters": [
+                    {
+                        "name": "claim_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Claim Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Block V1 Claims  Claim Id  Block Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/claims/{claim_id}/messages": {
+            "get": {
+                "tags": [
+                    "roszczenia"
+                ],
+                "summary": "Messages",
+                "operationId": "messages_v1_claims__claim_id__messages_get",
+                "parameters": [
+                    {
+                        "name": "claim_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Claim Id"
+                        }
+                    },
+                    {
+                        "name": "after_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "default": 0,
+                            "title": "After Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Messages V1 Claims  Claim Id  Messages Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "roszczenia"
+                ],
+                "summary": "Post Message",
+                "operationId": "post_message_v1_claims__claim_id__messages_post",
+                "parameters": [
+                    {
+                        "name": "claim_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Claim Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MessageIn"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Post Message V1 Claims  Claim Id  Messages Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/claims/{claim_id}/read": {
+            "post": {
+                "tags": [
+                    "roszczenia"
+                ],
+                "summary": "Read",
+                "operationId": "read_v1_claims__claim_id__read_post",
+                "parameters": [
+                    {
+                        "name": "claim_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Claim Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReadIn"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "tags": [
+                    "inne"
+                ],
+                "summary": "Health",
+                "operationId": "health_health_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": true,
+                                    "type": "object",
+                                    "title": "Response Health Health Get"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/meta": {
+            "get": {
+                "tags": [
+                    "inne"
+                ],
+                "summary": "Meta",
+                "operationId": "meta_v1_meta_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": true,
+                                    "type": "object",
+                                    "title": "Response Meta V1 Meta Get"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/search/parse": {
+            "post": {
+                "tags": [
+                    "inne"
+                ],
+                "summary": "Parse",
+                "operationId": "parse_v1_search_parse_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ParseIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": true,
+                                    "type": "object",
+                                    "title": "Response Parse V1 Search Parse Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/places/suggest": {
+            "get": {
+                "tags": [
+                    "inne"
+                ],
+                "summary": "Place Suggest",
+                "operationId": "place_suggest_v1_places_suggest_get",
+                "parameters": [
+                    {
+                        "name": "lat",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "title": "Lat"
+                        }
+                    },
+                    {
+                        "name": "lon",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "title": "Lon"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Place Suggest V1 Places Suggest Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/abuse-reports": {
+            "post": {
+                "tags": [
+                    "inne"
+                ],
+                "summary": "Report Abuse",
+                "operationId": "report_abuse_v1_abuse_reports_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AbuseIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": true,
+                                    "type": "object",
+                                    "title": "Response Report Abuse V1 Abuse Reports Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/abuse-reports": {
+            "get": {
+                "tags": [
+                    "inne"
+                ],
+                "summary": "Admin List",
+                "operationId": "admin_list_v1_admin_abuse_reports_get",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "open",
+                            "title": "Status"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Admin List V1 Admin Abuse Reports Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/abuse-reports/{abuse_id}/resolve": {
+            "post": {
+                "tags": [
+                    "inne"
+                ],
+                "summary": "Admin Resolve",
+                "operationId": "admin_resolve_v1_admin_abuse_reports__abuse_id__resolve_post",
+                "parameters": [
+                    {
+                        "name": "abuse_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Abuse Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminResolveIn"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Admin Resolve V1 Admin Abuse Reports  Abuse Id  Resolve Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AbuseIn": {
+                "properties": {
+                    "target_type": {
+                        "type": "string",
+                        "enum": [
+                            "report",
+                            "claim",
+                            "message"
+                        ],
+                        "title": "Target Type"
+                    },
+                    "target_id": {
+                        "type": "string",
+                        "maxLength": 40,
+                        "title": "Target Id"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "enum": [
+                            "scam",
+                            "bait",
+                            "spam",
+                            "offensive",
+                            "personal_data",
+                            "stolen",
+                            "other"
+                        ],
+                        "title": "Reason"
+                    },
+                    "details": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "title": "Details",
+                        "default": ""
+                    }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                    "target_type",
+                    "target_id",
+                    "reason"
+                ],
+                "title": "AbuseIn"
+            },
+            "AdminResolveIn": {
+                "properties": {
+                    "action": {
+                        "type": "string",
+                        "enum": [
+                            "dismiss",
+                            "hide_report",
+                            "unhide_report",
+                            "ban_guest"
+                        ],
+                        "title": "Action"
+                    },
+                    "note": {
+                        "type": "string",
+                        "maxLength": 300,
+                        "title": "Note",
+                        "default": ""
+                    }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                    "action"
+                ],
+                "title": "AdminResolveIn"
+            },
+            "Body_search_by_photo_v1_search_by_photo_post": {
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "contentMediaType": "application/octet-stream",
+                        "title": "File"
+                    },
+                    "kind": {
+                        "type": "string",
+                        "enum": [
+                            "lost",
+                            "found"
+                        ],
+                        "title": "Kind",
+                        "default": "found"
+                    },
+                    "category": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Category"
+                    },
+                    "lat": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Lat"
+                    },
+                    "lon": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Lon"
+                    },
+                    "radius_m": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Radius M"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "file"
+                ],
+                "title": "Body_search_by_photo_v1_search_by_photo_post"
+            },
+            "Body_upload_photo_v1_photos_post": {
+                "properties": {
+                    "file": {
+                        "type": "string",
+                        "contentMediaType": "application/octet-stream",
+                        "title": "File"
+                    },
+                    "purpose": {
+                        "type": "string",
+                        "enum": [
+                            "report",
+                            "evidence"
+                        ],
+                        "title": "Purpose",
+                        "default": "report"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "file"
+                ],
+                "title": "Body_upload_photo_v1_photos_post"
+            },
+            "ClaimCreate": {
+                "properties": {
+                    "answer": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "minLength": 3,
+                        "title": "Answer"
+                    },
+                    "proof_details": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "title": "Proof Details",
+                        "default": ""
+                    },
+                    "evidence_photo_ids": {
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "type": "array",
+                        "maxItems": 2,
+                        "title": "Evidence Photo Ids"
+                    },
+                    "lost_report_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Lost Report Id"
+                    }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                    "answer"
+                ],
+                "title": "ClaimCreate"
+            },
+            "DecisionIn": {
+                "properties": {
+                    "note": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 300
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Note"
+                    }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "title": "DecisionIn"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "HandoverIn": {
+                "properties": {
+                    "code": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 12
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Code"
+                    }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "title": "HandoverIn"
+            },
+            "LocationIn": {
+                "properties": {
+                    "lat": {
+                        "type": "number",
+                        "maximum": 90.0,
+                        "minimum": -90.0,
+                        "title": "Lat"
+                    },
+                    "lon": {
+                        "type": "number",
+                        "maximum": 180.0,
+                        "minimum": -180.0,
+                        "title": "Lon"
+                    },
+                    "accuracy_m": {
+                        "anyOf": [
+                            {
+                                "type": "integer",
+                                "maximum": 10000.0,
+                                "minimum": 0.0
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Accuracy M"
+                    },
+                    "uncertainty_m": {
+                        "type": "integer",
+                        "maximum": 3000.0,
+                        "minimum": 0.0,
+                        "title": "Uncertainty M",
+                        "default": 0
+                    },
+                    "source": {
+                        "type": "string",
+                        "enum": [
+                            "gps",
+                            "map"
+                        ],
+                        "title": "Source"
+                    }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                    "lat",
+                    "lon",
+                    "source"
+                ],
+                "title": "LocationIn"
+            },
+            "MessageIn": {
+                "properties": {
+                    "body": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "minLength": 1,
+                        "title": "Body"
+                    }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                    "body"
+                ],
+                "title": "MessageIn"
+            },
+            "ParseIn": {
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "maxLength": 300,
+                        "minLength": 1,
+                        "title": "Text"
+                    }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                    "text"
+                ],
+                "title": "ParseIn"
+            },
+            "ReadIn": {
+                "properties": {
+                    "last_read_id": {
+                        "type": "integer",
+                        "minimum": 0.0,
+                        "title": "Last Read Id"
+                    }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                    "last_read_id"
+                ],
+                "title": "ReadIn"
+            },
+            "RecoverIn": {
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "maxLength": 40,
+                        "minLength": 10,
+                        "title": "Code"
+                    }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                    "code"
+                ],
+                "title": "RecoverIn"
+            },
+            "ReportCreate": {
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "enum": [
+                            "lost",
+                            "found"
+                        ],
+                        "title": "Kind"
+                    },
+                    "category": {
+                        "type": "string",
+                        "maxLength": 32,
+                        "title": "Category"
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 80,
+                        "minLength": 3,
+                        "title": "Title"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 1000,
+                        "title": "Description",
+                        "default": ""
+                    },
+                    "attributes": {
+                        "additionalProperties": true,
+                        "propertyNames": {
+                            "maxLength": 2000
+                        },
+                        "type": "object",
+                        "title": "Attributes"
+                    },
+                    "colors": {
+                        "items": {
+                            "type": "string",
+                            "maxLength": 2000
+                        },
+                        "type": "array",
+                        "maxItems": 3,
+                        "title": "Colors"
+                    },
+                    "occurred_from": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Occurred From"
+                    },
+                    "occurred_to": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Occurred To"
+                    },
+                    "location": {
+                        "$ref": "#/components/schemas/LocationIn"
+                    },
+                    "area_label": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 80
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Area Label"
+                    },
+                    "holding": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "with_finder",
+                                    "at_place",
+                                    "office"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Holding"
+                    },
+                    "holding_note": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 120
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Holding Note"
+                    },
+                    "secret_details": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 500
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Secret Details"
+                    },
+                    "claim_question": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 200
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Claim Question"
+                    },
+                    "photo_ids": {
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "type": "array",
+                        "maxItems": 4,
+                        "title": "Photo Ids"
+                    }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                    "kind",
+                    "category",
+                    "title",
+                    "occurred_from",
+                    "occurred_to",
+                    "location"
+                ],
+                "title": "ReportCreate"
+            },
+            "ReportUpdate": {
+                "properties": {
+                    "category": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 32
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Category"
+                    },
+                    "title": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 80,
+                                "minLength": 3
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Title"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 1000
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "attributes": {
+                        "anyOf": [
+                            {
+                                "additionalProperties": true,
+                                "propertyNames": {
+                                    "maxLength": 2000
+                                },
+                                "type": "object"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Attributes"
+                    },
+                    "colors": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string",
+                                    "maxLength": 2000
+                                },
+                                "type": "array",
+                                "maxItems": 3
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Colors"
+                    },
+                    "occurred_from": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Occurred From"
+                    },
+                    "occurred_to": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Occurred To"
+                    },
+                    "location": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/LocationIn"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "area_label": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 80
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Area Label"
+                    },
+                    "holding": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "with_finder",
+                                    "at_place",
+                                    "office"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Holding"
+                    },
+                    "holding_note": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 120
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Holding Note"
+                    },
+                    "secret_details": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 500
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Secret Details"
+                    },
+                    "claim_question": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "maxLength": 200
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Claim Question"
+                    },
+                    "photo_ids": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                },
+                                "type": "array",
+                                "maxItems": 4
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Photo Ids"
+                    }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "title": "ReportUpdate"
+            },
+            "ResolveIn": {
+                "properties": {
+                    "note": {
+                        "type": "string",
+                        "enum": [
+                            "owner_found",
+                            "handed_to_office",
+                            "returned_outside_app",
+                            "other"
+                        ],
+                        "title": "Note",
+                        "default": "other"
+                    }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "title": "ResolveIn"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    },
+                    "input": {
+                        "title": "Input"
+                    },
+                    "ctx": {
+                        "type": "object",
+                        "title": "Context"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}

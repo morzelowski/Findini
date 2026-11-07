@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Findini</string>
+    <string name="notif_channel_matches">Dopasowania i sprawy</string>
+    <string name="notif_channel_desc">Nowe możliwe dopasowania i wiadomości w Twoich sprawach</string>
+</resources>

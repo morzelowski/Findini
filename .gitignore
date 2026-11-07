@@ -1,0 +1,21 @@
+.env
+/models/*
+!/models/README.md
+/backups/
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/.ruff_cache/
+*.pyc
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/.kotlin/
+*.iml
+*.keystore
+!android/app/debug.keystore
+.DS_Store
+/data/

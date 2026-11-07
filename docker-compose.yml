@@ -1,0 +1,63 @@
+# Findini — uruchomienie lokalne: `docker compose up --build`
+# API: http://localhost:8080  (dokumentacja: /docs)
+name: findini
+
+services:
+  db:
+    build: ./infra/db
+    image: findini-db:17-pgvector0.8.7-postgis3
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-findini}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-findini-dev-password}
+      POSTGRES_DB: ${POSTGRES_DB:-findini}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${DB_PORT:-5433}:5432"   # tylko localhost — do testów integracyjnych i backupu
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-findini} -d ${POSTGRES_DB:-findini}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: ./backend
+    image: findini-api:1.0.0
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      FINDINI_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-findini}:${POSTGRES_PASSWORD:-findini-dev-password}@db:5432/${POSTGRES_DB:-findini}
+      FINDINI_STORAGE_DIR: /data/photos
+      FINDINI_AI_MODEL_DIR: /models/clip-vit-b32
+    volumes:
+      - photo-data:/data/photos
+      - ./models:/models:ro
+    ports:
+      - "${API_BIND:-0.0.0.0}:${API_PORT:-8080}:8080"
+
+  # Opcjonalnie: HTTPS z automatycznym certyfikatem (Let's Encrypt) dla domeny publicznej.
+  # docker compose --profile https up -d   (wymaga FINDINI_DOMAIN wskazującej na ten serwer)
+  caddy:
+    image: caddy:2.10.2-alpine
+    profiles: ["https"]
+    restart: unless-stopped
+    depends_on: [api]
+    environment:
+      FINDINI_DOMAIN: ${FINDINI_DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+
+volumes:
+  db-data:
+  photo-data:
+  caddy-data:
