@@ -1,7 +1,7 @@
 """Sesje gościa, tokeny, kody odzyskiwania i zależności autoryzacji.
 
-- Token sesji: 256 bitów z `secrets`, w bazie tylko SHA-256 (wyciek bazy nie daje tokenów).
-- Kod odzyskiwania: ~100 bitów entropii, w bazie HMAC-SHA256(server_secret, kod).
+- Token sesji: 384 bity z `secrets`, w bazie tylko SHA-256.
+- Kod odzyskiwania: 160 bitów + suma kontrolna, w bazie HMAC-SHA256(server_secret, kod).
 - UUID zasobu nigdy nie jest traktowany jako uwierzytelnienie.
 """
 
@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import re
 import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -68,7 +69,7 @@ def now_utc() -> datetime:
 
 
 def new_token() -> str:
-    return TOKEN_PREFIX + secrets.token_urlsafe(32)
+    return TOKEN_PREFIX + secrets.token_urlsafe(48)
 
 
 def hash_token(token: str) -> str:
@@ -80,9 +81,23 @@ def random_alias() -> str:
 
 
 def new_recovery_code() -> str:
-    """5 grup po 4 znaki Crockford base32 = 100 bitów entropii, np. 7K2M-QX9D-..."""
-    chars = "".join(secrets.choice(_CROCKFORD) for _ in range(20))
-    return "-".join(chars[i : i + 4] for i in range(0, 20, 4))
+    """8 grup losowych (160 bitów) + grupa kontrolna wykrywająca literówki."""
+    payload = "".join(secrets.choice(_CROCKFORD) for _ in range(32))
+    chars = payload + _recovery_checksum(payload)
+    return "-".join(chars[i : i + 4] for i in range(0, len(chars), 4))
+
+
+def _recovery_checksum(payload: str) -> str:
+    bits = int.from_bytes(hashlib.sha256(("findini-recovery-v2:" + payload).encode()).digest()[:3], "big")
+    return "".join(_CROCKFORD[(bits >> shift) & 31] for shift in (15, 10, 5, 0))
+
+
+def valid_recovery_code(code: str) -> bool:
+    c = normalize_recovery_code(code)
+    if not re.fullmatch(r"[0-9A-HJKMNP-TV-Z]+", c):
+        return False
+    # Istniejące kody zachowują ważność do wymiany/odzyskania dostępu.
+    return len(c) == 20 or (len(c) == 36 and hmac.compare_digest(c[-4:], _recovery_checksum(c[:32])))
 
 
 def normalize_recovery_code(code: str) -> str:
@@ -97,7 +112,7 @@ def hash_recovery_code(code: str) -> str:
 
 
 def new_handover_code() -> str:
-    return f"{secrets.randbelow(1_000_000):06d}"
+    return f"{secrets.randbelow(100_000_000):08d}"
 
 
 def client_ip(request: Request) -> str:

@@ -28,7 +28,7 @@ class Settings(BaseSettings):
 
     # Model AI (lokalny CLIP w ONNX). Brak plików => funkcje AI niedostępne, reszta działa.
     ai_enabled: bool = True
-    ai_model_dir: Path = Path("/models/clip-vit-b32")
+    ai_model_dir: Path = Path("/models/clip-vit-b16")
     ai_vision_file: str = "onnx/vision_model.onnx"
     ai_text_file: str = "onnx/text_model_quantized.onnx"
     ai_timeout_s: float = 8.0
@@ -36,14 +36,17 @@ class Settings(BaseSettings):
     ai_threads: int = 2
     background_jobs: bool = True
 
-    # Pilotaż: Kraków i okolice. Zgłoszenia spoza obszaru są odrzucane.
-    pilot_name: str = "Kraków"
-    pilot_center_lat: float = 50.0614
-    pilot_center_lon: float = 19.9366
-    pilot_min_lat: float = 49.90
-    pilot_max_lat: float = 50.20
-    pilot_min_lon: float = 19.65
-    pilot_max_lon: float = 20.30
+    # Cała Polska z niewielkim marginesem przy granicy. Nazwy zmiennych zachowane
+    # dla zgodności istniejących instalacji; obszar to prostokąt, nie granica państwa.
+    pilot_name: str = "Polska"
+    pilot_center_lat: float = 52.0
+    pilot_center_lon: float = 19.0
+    pilot_min_lat: float = 48.95
+    pilot_max_lat: float = 54.90
+    pilot_min_lon: float = 14.05
+    pilot_max_lon: float = 24.20
+    # Stałe odniesienie siatki: zmiana zasięgu/mapy nie przesuwa istniejących komórek.
+    grid_reference_lat: float = 50.0614
     # Rozmiar komórki publicznej siatki (m). Publiczna lokalizacja = środek komórki.
     grid_cell_m: int = 500
 

@@ -212,7 +212,7 @@ fun CaseScreen(nav: NavController, id: String, snackbar: SnackbarHostState) {
             onDismissRequest = { dialog = null },
             title = { Text("Zablokować kontakt?") },
             text = { Text("Rozmowa zostanie zamknięta, a ta osoba nie złoży więcej roszczeń do Twoich zgłoszeń. Jeśli coś było niepokojące — zgłoś też nadużycie.") },
-            confirmButton = { Button(onClick = { dialog = null; act({ repo.private { block(id) } }, "Kontakt zablokowany") }) { Text("Zablokuj") } },
+            confirmButton = { Button(shape = MaterialTheme.shapes.small, onClick = { dialog = null; act({ repo.private { block(id) } }, "Kontakt zablokowany") }) { Text("Zablokuj") } },
             dismissButton = { TextButton(onClick = { dialog = null }) { Text("Anuluj") } },
         )
         "abuse" -> AbuseDialog(onDismiss = { dialog = null }) { reason, details ->
@@ -293,7 +293,7 @@ private fun CasePanel(c: Case, busy: Boolean, imageUrl: (String) -> String, act:
                 if (c.proofDetails.isNotBlank()) KeyValue("Szczegóły", c.proofDetails)
                 if (c.isFinder) KeyValue("Twój ukryty szczegół", c.secretDetails ?: "— (nie podano)")
                 c.evidencePhotos.forEach { p ->
-                    AsyncImage(imageUrl(p.url), "Zdjęcie dowodu", contentScale = ContentScale.Crop, modifier = Modifier.padding(top = 6.dp).fillMaxWidth().height(180.dp).clip(MaterialTheme.shapes.medium))
+                    AsyncImage(imageUrl(p.url), "Zdjęcie dowodu", contentScale = ContentScale.Fit, modifier = Modifier.padding(top = 6.dp).fillMaxWidth().height(180.dp).clip(MaterialTheme.shapes.medium))
                 }
                 c.finderNote?.let { KeyValue("Notatka znalazcy", it) }
             }
@@ -306,8 +306,8 @@ private fun CasePanel(c: Case, busy: Boolean, imageUrl: (String) -> String, act:
                     Tone.Info,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = { act({ repo.private { accept(c.id, NoteIn(null)) } }, "Zaakceptowano — umówcie przekazanie") }, enabled = !busy, modifier = Modifier.weight(1f)) { Text("Akceptuj") }
-                    OutlinedButton(onClick = { rejectNote = "" }, enabled = !busy, modifier = Modifier.weight(1f)) { Text("Odrzuć") }
+                    Button(shape = MaterialTheme.shapes.small, onClick = { act({ repo.private { accept(c.id, NoteIn(null)) } }, "Zaakceptowano — umówcie przekazanie") }, enabled = !busy, modifier = Modifier.weight(1f)) { Text("Akceptuj") }
+                    OutlinedButton(shape = MaterialTheme.shapes.small, onClick = { rejectNote = "" }, enabled = !busy, modifier = Modifier.weight(1f)) { Text("Odrzuć") }
                 }
             }
             c.isFinder && c.status == "accepted" -> {
@@ -318,14 +318,14 @@ private fun CasePanel(c: Case, busy: Boolean, imageUrl: (String) -> String, act:
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             OutlinedTextField(
                                 value = code,
-                                onValueChange = { v -> code = v.filter { it.isDigit() }.take(6) },
-                                label = { Text("Kod (6 cyfr)") },
+                                onValueChange = { v -> code = v.filter { it in '0'..'9' }.take(c.handoverCodeLength) },
+                                label = { Text("Kod (${c.handoverCodeLength} cyfr)") },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                                 singleLine = true,
                                 modifier = Modifier.weight(1f),
                             )
                             Spacer(Modifier.width(8.dp))
-                            Button(onClick = { act({ repo.private { handover(c.id, HandoverIn(code)) } }, null) }, enabled = code.length == 6 && !busy) { Text("Wydaję") }
+                            Button(shape = MaterialTheme.shapes.small, onClick = { act({ repo.private { handover(c.id, HandoverIn(code)) } }, null) }, enabled = code.length == c.handoverCodeLength && !busy) { Text("Wydaję") }
                         }
                         c.handoverAttemptsLeft?.let { Text("Pozostałe próby: $it", style = MaterialTheme.typography.labelSmall) }
                         if (c.finderConfirmed) Text("Potwierdziłeś wydanie. Czekamy na potwierdzenie odbioru przez drugą stronę.", style = MaterialTheme.typography.bodySmall)
@@ -345,13 +345,13 @@ private fun CasePanel(c: Case, busy: Boolean, imageUrl: (String) -> String, act:
                     Column(Modifier.padding(16.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("Twój kod przekazania", style = MaterialTheme.typography.titleSmall)
                         Text(
-                            c.handoverCode?.chunked(3)?.joinToString(" ") ?: "—",
+                            c.handoverCode?.chunked(if (c.handoverCode.length == 8) 4 else 3)?.joinToString(" ") ?: "—",
                             style = Mono,
                             modifier = Modifier.semantics { contentDescription = "Kod przekazania: " + (c.handoverCode?.toList()?.joinToString(" ") ?: "") },
                         )
                         Text("Pokaż go znalazcy dopiero przy spotkaniu, gdy zobaczysz swoją rzecz.", style = MaterialTheme.typography.bodySmall)
                         Spacer(Modifier.height(8.dp))
-                        Button(onClick = { act({ repo.private { confirmReceived(c.id) } }, "Dziękujemy za potwierdzenie") }, enabled = !busy && !c.ownerConfirmed) {
+                        Button(shape = MaterialTheme.shapes.small, onClick = { act({ repo.private { confirmReceived(c.id) } }, "Dziękujemy za potwierdzenie") }, enabled = !busy && !c.ownerConfirmed) {
                             Text(if (c.ownerConfirmed) "Potwierdziłeś odbiór" else "Odebrałem przedmiot")
                         }
                         TextButton(onClick = { act({ repo.private { withdraw(c.id) } }, "Roszczenie wycofane") }) { Text("Wycofaj roszczenie") }
@@ -362,7 +362,7 @@ private fun CasePanel(c: Case, busy: Boolean, imageUrl: (String) -> String, act:
                 InfoCard("Przedmiot wrócił do właściciela", "Sprawa zamknięta. Dziękujemy za życzliwość!", Tone.Success)
                 if (!c.isFinder) {
                     if (c.thanked) Text("❤ Podziękowanie wysłane", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary)
-                    else Button(onClick = { act({ repo.private { thanks(c.id) } }, "Wysłano podziękowanie ❤") }, enabled = !busy) {
+                    else Button(shape = MaterialTheme.shapes.small, onClick = { act({ repo.private { thanks(c.id) } }, "Wysłano podziękowanie ❤") }, enabled = !busy) {
                         Icon(Icons.Outlined.Favorite, null); Spacer(Modifier.width(6.dp)); Text("Podziękuj znalazcy")
                     }
                     Text("Serduszko to gest wdzięczności, nie ocena uczciwości.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -392,7 +392,7 @@ private fun CasePanel(c: Case, busy: Boolean, imageUrl: (String) -> String, act:
                 OutlinedTextField(note, { rejectNote = it.take(300) }, label = { Text("Krótka informacja dla tej osoby (opcjonalnie)") })
             },
             confirmButton = {
-                Button(onClick = {
+                Button(shape = MaterialTheme.shapes.small, onClick = {
                     val n = rejectNote
                     rejectNote = null
                     act({ repo.private { reject(c.id, NoteIn(n?.ifBlank { null })) } }, "Zapisano decyzję")

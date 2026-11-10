@@ -1,0 +1,170 @@
+{
+  "dataset": "ABO, CC BY 4.0; ten sam podział co eksperyment 07.11.2026",
+  "hardware": "arm64 Darwin 27.0.0, CPU, 2 wątki",
+  "variants": {
+    "clip-vit-b32@6b7c523/fp32": {
+      "queries": 411,
+      "gallery_size": 511,
+      "recall@1": 0.353,
+      "recall@5": 0.538,
+      "recall@10": 0.662,
+      "mrr": 0.443,
+      "median_rank": 5.0,
+      "random_baseline_recall@10": 0.02,
+      "with_category_filter": {
+        "recall@1": 0.372,
+        "recall@5": 0.572,
+        "recall@10": 0.71
+      },
+      "per_type_recall@1": {
+        "BACKPACK": 0.43,
+        "CELLULAR_PHONE_CASE": 0.87,
+        "CHARGING_ADAPTER": 0.33,
+        "DRINKING_CUP": 0.37,
+        "EYEWEAR": 0.37,
+        "FINENECKLACEBRACELETANKLET": 0.03,
+        "FINERING": 0.17,
+        "HANDBAG": 0.4,
+        "HAT": 0.47,
+        "HEADPHONES": 0.37,
+        "SUITCASE": 0.27,
+        "UMBRELLA": 0.33,
+        "WALLET": 0.3,
+        "WATCH": 0.19
+      },
+      "similarity": {
+        "positive_pair_median": 0.81,
+        "positive_pair_p10": 0.611,
+        "hardest_same_type_negative_median": 0.827,
+        "positive_above_hardest_negative": 0.387,
+        "heldout_top1_median": 0.837
+      },
+      "distinct_margin_criterion": {
+        "0.03": {
+          "correct_top1_flagged": 0.476,
+          "wrong_top1_flagged": 0.169,
+          "heldout_flagged": 0.164,
+          "precision": 0.515
+        },
+        "0.04": {
+          "correct_top1_flagged": 0.324,
+          "wrong_top1_flagged": 0.079,
+          "heldout_flagged": 0.115,
+          "precision": 0.573
+        },
+        "0.05": {
+          "correct_top1_flagged": 0.269,
+          "wrong_top1_flagged": 0.038,
+          "heldout_flagged": 0.041,
+          "precision": 0.722
+        },
+        "0.06": {
+          "correct_top1_flagged": 0.241,
+          "wrong_top1_flagged": 0.015,
+          "heldout_flagged": 0.008,
+          "precision": 0.875
+        }
+      },
+      "thresholds": {
+        "similar": 0.86,
+        "related": 0.8,
+        "true_match_ge_strong": 0.333,
+        "true_match_ge_related": 0.545,
+        "heldout_false_convincing_ge_related": 0.68,
+        "heldout_false_strong_ge_strong": 0.303
+      },
+      "ms_per_image_cpu": 17.49,
+      "zero_shot": {
+        "images": 533,
+        "category_top1_accuracy": 0.812,
+        "subtype_top1_accuracy": 0.608,
+        "share_marked_clear": 0.69,
+        "category_accuracy_when_clear": 0.897,
+        "color_images_with_english_label": 208,
+        "color_top1_in_label": 0.538
+      }
+    },
+    "clip-vit-b16@342fdf2/fp32": {
+      "queries": 411,
+      "gallery_size": 511,
+      "recall@1": 0.345,
+      "recall@5": 0.564,
+      "recall@10": 0.686,
+      "mrr": 0.453,
+      "median_rank": 4.0,
+      "random_baseline_recall@10": 0.02,
+      "with_category_filter": {
+        "recall@1": 0.36,
+        "recall@5": 0.589,
+        "recall@10": 0.749
+      },
+      "per_type_recall@1": {
+        "BACKPACK": 0.37,
+        "CELLULAR_PHONE_CASE": 0.87,
+        "CHARGING_ADAPTER": 0.2,
+        "DRINKING_CUP": 0.4,
+        "EYEWEAR": 0.43,
+        "FINENECKLACEBRACELETANKLET": 0.07,
+        "FINERING": 0.1,
+        "HANDBAG": 0.47,
+        "HAT": 0.47,
+        "HEADPHONES": 0.37,
+        "SUITCASE": 0.33,
+        "UMBRELLA": 0.3,
+        "WALLET": 0.27,
+        "WATCH": 0.14
+      },
+      "similarity": {
+        "positive_pair_median": 0.827,
+        "positive_pair_p10": 0.658,
+        "hardest_same_type_negative_median": 0.839,
+        "positive_above_hardest_negative": 0.375,
+        "heldout_top1_median": 0.839
+      },
+      "distinct_margin_criterion": {
+        "0.03": {
+          "correct_top1_flagged": 0.451,
+          "wrong_top1_flagged": 0.048,
+          "heldout_flagged": 0.066,
+          "precision": 0.753
+        },
+        "0.04": {
+          "correct_top1_flagged": 0.352,
+          "wrong_top1_flagged": 0.026,
+          "heldout_flagged": 0.041,
+          "precision": 0.806
+        },
+        "0.05": {
+          "correct_top1_flagged": 0.296,
+          "wrong_top1_flagged": 0.011,
+          "heldout_flagged": 0.016,
+          "precision": 0.894
+        },
+        "0.06": {
+          "correct_top1_flagged": 0.246,
+          "wrong_top1_flagged": 0.011,
+          "heldout_flagged": 0.0,
+          "precision": 0.921
+        }
+      },
+      "thresholds": {
+        "similar": 0.86,
+        "related": 0.8,
+        "true_match_ge_strong": 0.375,
+        "true_match_ge_related": 0.623,
+        "heldout_false_convincing_ge_related": 0.689,
+        "heldout_false_strong_ge_strong": 0.402
+      },
+      "ms_per_image_cpu": 49.02,
+      "zero_shot": {
+        "images": 533,
+        "category_top1_accuracy": 0.85,
+        "subtype_top1_accuracy": 0.623,
+        "share_marked_clear": 0.758,
+        "category_accuracy_when_clear": 0.918,
+        "color_images_with_english_label": 208,
+        "color_top1_in_label": 0.596
+      }
+    }
+  }
+}

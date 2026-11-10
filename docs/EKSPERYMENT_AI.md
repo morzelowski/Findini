@@ -13,7 +13,7 @@ Czy lokalny model obrazu pomaga znaleźć **konkretny egzemplarz** wśród wielu
 - Deduplikacja: ABO zawiera warianty produktu z identycznym zdjęciem — pominięto produkty ze wspólnym zdjęciem.
 
 ## Model i sprzęt
-CLIP ViT‑B/32 (OpenAI, MIT), eksport ONNX `Xenova/clip-vit-base-patch32@6b7c523`, dwa warianty: fp32 (352 MB) i int8 (89 MB). ONNX Runtime 1.31.1 na CPU (Apple M5, 2 wątki). Podpowiedzi zero‑shot: angielskie prompty dla rodzajów (np. „a photo of a backpack”) i kolorów (średnia z 4 szablonów).
+CLIP ViT‑B/32 (MIT), eksport ONNX `Xenova/clip-vit-base-patch32@6b7c523`, dwa warianty: fp32 (352 MB) i int8 (89 MB). ONNX Runtime 1.31.1 na CPU (Apple M5, 2 wątki). Podpowiedzi zero‑shot: angielskie prompty dla rodzajów (np. „a photo of a backpack”) i kolorów (średnia z 4 szablonów).
 
 ## Wyniki — wyszukiwanie egzemplarza
 | Metryka | fp32 | int8 | losowo |
@@ -70,3 +70,7 @@ Uśrednianie 4 szablonów promptu poprawiło trafność koloru z 0,44 do 0,54 (s
 - Zbiór 411 produktów — przedziały ufności szerokie (np. Recall@1 0,35 ± ok. 0,05).
 - Progi (0,05, 0,80, 0,86) dobrane na tym samym zbiorze — potrzebna walidacja na zdjęciach zebranych w pilotażu (z zachowaniem prywatności).
 - Brak testu z prawdziwymi zdjęciami „zguba vs znalezisko” tego samego przedmiotu zrobionymi przez różne osoby — rekomendowany kolejny krok (np. 30 własnych przedmiotów zespołu, po 2 zdjęcia w różnych warunkach).
+
+## Porównanie z B/16 — 10.11.2026
+
+Wariant domyślny zmieniono na B/16 po rzeczywistym porównaniu na tym samym podziale danych. [Wyniki i ograniczenia](ZMIANY_2026_11_10.md), [surowy wynik](porownanie_modeli_cpu.json). Powyższy eksperyment B/32 pozostaje historycznym punktem odniesienia.

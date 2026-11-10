@@ -2,20 +2,20 @@
 
 **Aplikacja na Androida do zgłaszania znalezionych przedmiotów i odnajdywania zgub** — z prawdziwym backendem, bazą danych, aparatem, GPS, wyszukiwaniem zdjęciem i bezpieczną ścieżką zwrotu.
 
-Zespół: Krzysztof Czaplicki, Aleksandra Łabęda, Mateusz Orzełowski · Pilotaż: **Kraków** (założenie projektowe, konfigurowalne).
+Zespół: Krzysztof Czaplicki, Aleksandra Łabęda, Mateusz Orzełowski · Zasięg: **cała Polska**. Miejscowość wybierzesz po nazwie, z GPS lub na mapie.
 
 <p>
-<img src="docs/zrzuty/01_start.png" width="180"> <img src="docs/zrzuty/02b_asystent_lista.png" width="180"> <img src="docs/zrzuty/09_podsumowanie_publiczne_prywatne.png" width="180"> <img src="docs/zrzuty/12_ocena_roszczenia.png" width="180"> <img src="docs/zrzuty/13_kod_przekazania_czat.png" width="180">
+<img src="docs/zrzuty/2026-11-10/01-katalog.png" width="180"> <img src="docs/zrzuty/2026-11-10/02-zwiniety-naglowek.png" width="180"> <img src="docs/zrzuty/2026-11-10/03-obszar.png" width="180"> <img src="docs/zrzuty/2026-11-10/05-pelny-podglad.png" width="180">
 </p>
 
 ## Co działa
 
 | Obszar | Zaimplementowane |
 |---|---|
-| Szukanie bez konta | Lista + mapa (MapLibre/OpenFreeMap) z przybliżonymi obszarami, filtry: rodzaj, kategoria/rodzaj, kolor (z kolorami pokrewnymi), czas zdarzenia, obszar (GPS jednorazowo, punkty orientacyjne, promień), tekst odporny na polską odmianę i brak ogonków (pg_trgm + unaccent), stabilna paginacja kursorem, „dlaczego pasuje” przy każdym wyniku, podpowiedzi przy braku wyników. |
-| Asystent wyszukiwania | Zdanie po polsku („zgubiłem czarną czapkę wczoraj przy AGH”) → edytowalne filtry. Działa na regułach (bez LLM i bez kluczy) — opisane uczciwie jako reguły. |
+| Szukanie bez konta | Lista + mapa (MapLibre/OpenFreeMap) z przybliżonymi obszarami, filtry: rodzaj, kategoria/rodzaj, kolor (z kolorami pokrewnymi), czas zdarzenia, obszar (GPS jednorazowo, lokalny katalog 45 427 miejscowości, promień 0,5–25 km), tekst odporny na polską odmianę i brak ogonków (pg_trgm + unaccent), stabilna paginacja kursorem, „dlaczego pasuje” przy każdym wyniku, podpowiedzi przy braku wyników. |
+| Asystent wyszukiwania | Zdanie po polsku („zgubiłem czarną czapkę wczoraj w Warszawie”) → edytowalne filtry. Działa na regułach (bez LLM i bez kluczy) — opisane uczciwie jako reguły. |
 | Zgłoszenie „Znalazłem/Zgubiłem” | Kreator 4 kroków: zdjęcia (CameraX w aplikacji / Photo Picker / bez zdjęcia), miejsce zdarzenia (GPS z niepewnością + ręczna korekta na mapie + punkty orientacyjne), przedział czasu, gdzie jest teraz przedmiot, cechy zależne od kategorii, **ukryty szczegół** i pytanie weryfikacyjne, podgląd „co publiczne / co prywatne”. Szkic zapisuje się lokalnie i przetrwa błąd sieci i restart aplikacji. Edycja, odnowienie, zamknięcie, usunięcie. |
-| AI (lokalne, bez kluczy) | CLIP ViT-B/32 w ONNX Runtime na serwerze: **wyszukiwanie zdjęciem we własnej bazie**, sygnał w dopasowaniach, **podpowiedź kategorii/rodzaju/koloru** (do zatwierdzenia). Indeksowanie w tle z ponawianiem, stan widoczny w aplikacji, AI niedostępne ⇒ reszta działa. [Eksperyment](docs/EKSPERYMENT_AI.md) na 511 zdjęciach podobnych rzeczy. |
+| AI (lokalne, bez kluczy) | CLIP ViT-B/16 w ONNX Runtime na serwerze: **wyszukiwanie zdjęciem we własnej bazie**, sygnał w dopasowaniach, **podpowiedź kategorii/rodzaju/koloru** (do zatwierdzenia). Indeksowanie w tle z ponawianiem, stan widoczny w aplikacji, AI niedostępne ⇒ reszta działa. [Porównanie modeli na CPU](docs/ZMIANY_2026_11_10.md) na tej samej galerii 511 zdjęć podobnych rzeczy. |
 | Dopasowania zguba ↔ znalezisko (wyróżnik) | Automatyczni kandydaci z poziomami „mocne / możliwe” i sygnałami (kategoria, kolor, marka, odległość, czas, zdjęcie) oraz **ostrzeżeniami o niezgodnościach**; „brak przekonujących dopasowań”; okresowe sprawdzanie (WorkManager) i lokalne powiadomienie. |
 | Roszczenie → zwrot | Prywatne roszczenie (odpowiedź + opcjonalne zdjęcie‑dowód widoczne tylko dla znalazcy), znalazca porównuje z ukrytym szczegółem i decyduje, czat przypisany do sprawy, **jednorazowy kod przekazania**, potwierdzenie obu stron, zamknięcie pozostałych roszczeń, serduszko (raz). Odporność na współbieżność (blokady + unikalny indeks częściowy). |
 | Zaufanie i nadużycia | Blokada kontaktu, zgłoszenie nadużycia (auto‑ukrycie po 3 zgłoszeniach), panel moderacji `/admin`, wskazówki bezpiecznego przekazania, odrzucanie telefonów/e‑maili/linków w treściach publicznych, brak zdjęć dokumentów, limity żądań (sesja + skrót IP). |
@@ -23,6 +23,8 @@ Zespół: Krzysztof Czaplicki, Aleksandra Łabęda, Mateusz Orzełowski · Pilot
 | Udostępnianie | Link `…/r/{id}` — strona WWW z danymi publicznymi do wrzucenia na grupę uczelni/osiedla (odpowiedź na „mało zgłoszeń”). |
 
 Szczegóły: [architektura](docs/ARCHITEKTURA.md) · [API](docs/API.md) · [model zagrożeń](docs/MODEL_ZAGROZEN.md) · [prywatność i retencja](docs/PRYWATNOSC_I_RETENCJA.md) · [raport z testów](docs/RAPORT_TESTOW.md) · [eksperyment AI](docs/EKSPERYMENT_AI.md) · [scenariusz demo](docs/DEMO.md) · [materiał na poster](docs/POSTER.md).
+
+Aktualizacja 10.11.2026: [zakres zmian i bieżąca weryfikacja](docs/ZMIANY_2026_11_10.md). Starsze raporty i zrzuty opisują wcześniejszą wersję.
 
 ## Wymagania
 
@@ -56,7 +58,7 @@ docker compose up -d --build
 curl http://localhost:8080/health
 ```
 
-- Model: `Xenova/clip-vit-base-patch32` (licencja MIT), rewizja przypięta, pliki sprawdzane SHA‑256, ~420 MB w `models/`. Bez modelu API działa, a funkcje AI zgłaszają niedostępność.
+- Model: `Xenova/clip-vit-base-patch16` (licencja MIT), rewizja przypięta, pliki sprawdzane SHA‑256, ~420 MB w `models/`. Bez modelu API działa, a funkcje AI zgłaszają niedostępność.
 - Migracje Alembic uruchamiają się automatycznie przy starcie kontenera (`alembic upgrade head` — idempotentne).
 - Dokumentacja interaktywna API: http://localhost:8080/docs, kontrakt: [`docs/openapi.json`](docs/openapi.json).
 - Dane i zdjęcia są w wolumenach `findini_db-data` i `findini_photo-data` — przetrwają restart i `docker compose down` (bez `-v`).
@@ -82,10 +84,10 @@ cd android && ./gradlew :app:assembleDebug
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Lokalizację emulatora ustaw na Kraków (zgłoszenia spoza obszaru pilotażu są odrzucane):
+Przykładowa lokalizacja emulatora: Warszawa. Obsługiwane są miejscowości z całej Polski:
 
 ```bash
-adb emu geo fix 19.9195 50.0661
+adb emu geo fix 21.0122 52.2297
 ```
 
 Aparat w emulatorze: uruchom z `-camera-back emulated` (kamera `virtualscene` na Apple Silicon zwracała błędne klatki — patrz raport testów).
@@ -152,13 +154,13 @@ cd backend && .venv/bin/python -m scripts.ai_experiment download && .venv/bin/py
 **Test obciążenia** (10 tys. zgłoszeń w osobnej bazie `findini_load`, 50 sesji):
 
 ```bash
-cd backend && .venv/bin/python -m scripts.loadtest_seed --db postgresql+psycopg://findini:findini-dev-password@localhost:5433/findini_load
+cd backend && .venv/bin/python -m scripts.loadtest_seed --db postgresql+psycopg://findini:findini-dev-password@localhost:5433/findini_load --nationwide
 ```
 
-Następnie uruchom drugą instancję API na tę bazę (polecenie w raporcie testów) i:
+Generator domyślnie wylicza prawdziwe wektory B/16 ze zdjęć demo. Używając własnego pliku, podaj zgodne `--embedding-file` i `--embedding-model`. Następnie uruchom drugą instancję API na tę bazę (polecenie w raporcie testów), wyłącz w niej zadania porządkowe przy współdzielonym magazynie zdjęć i wykonaj:
 
 ```bash
-.venv/bin/python -m scripts.loadtest --base http://localhost:8081 --users 50 --duration 120
+.venv/bin/python -m scripts.loadtest --base http://localhost:8081 --users 50 --duration 120 --nationwide
 ```
 
 ## Kopia zapasowa i odtworzenie
@@ -181,8 +183,8 @@ Ustaw `FINDINI_ADMIN_TOKEN` (min. 24 znaki), otwórz http://localhost:8080/admin
 | Element | Dostawca / licencja | Klucz / koszt | Zachowanie przy awarii |
 |---|---|---|---|
 | Mapa | MapLibre Android 13.7.1 (BSD‑2), kafelki **OpenFreeMap** (styl Positron), dane © współtwórcy OpenStreetMap (ODbL) — atrybucja w przycisku „i” na mapie | bez klucza i opłat; przy dużym ruchu rozważ własny serwer kafelków | komunikat „Mapa niedostępna”, lista i punkty orientacyjne działają, ręczny wybór miejsca też |
-| Geokodowanie | nie używamy zewnętrznego — lista publicznych punktów orientacyjnych Krakowa w kodzie (`app/domain/nlquery.py`) | — | — |
-| AI | CLIP ViT‑B/32 (OpenAI, MIT) w eksporcie ONNX `Xenova/clip-vit-base-patch32` (MIT), lokalnie | bez kluczy i opłat; CPU ~20–30 ms/zdjęcie | wyszukiwanie zdjęciem zwraca 503 z czytelnym komunikatem; podpowiedzi znikają; indeksowanie dokończy się w tle |
+| Miejscowości | lokalny katalog GeoNames (CC BY 4.0), 45 427 miejscowości, województwa i powiaty; [źródło](backend/app/data/GEONAMES.md) | bez kluczy i opłat | działa bez połączenia z geokoderem; dokładny punkt wskazuje użytkownik na mapie |
+| AI | CLIP ViT‑B/16 w eksporcie ONNX `Xenova/clip-vit-base-patch16` (MIT), lokalnie | bez kluczy i opłat; CPU ~49 ms/zdjęcie na komputerze testowym (2 wątki) | wyszukiwanie zdjęciem zwraca 503 z czytelnym komunikatem; podpowiedzi znikają; indeksowanie dokończy się w tle |
 | Krój pisma | Plus Jakarta Sans (SIL OFL 1.1) | — | — |
 | Zdjęcia demo/eksperymentu | Amazon Berkeley Objects (CC BY 4.0) — `backend/scripts/demo_photos/ATTRIBUTION.md` | — | — |
 
@@ -190,7 +192,7 @@ Findini nie korzysta z Google Maps, Firebase ani płatnych API. Brak integracji 
 
 ## Rozwiązywanie problemów
 - **Aplikacja: „Brak połączenia z serwerem”** — sprawdź `curl http://localhost:8080/health`; w emulatorze adres to `10.0.2.2`, na telefonie patrz sekcja „Telefon fizyczny”.
-- **„Findini działa obecnie pilotażowo w obszarze: Kraków”** — ustaw lokalizację emulatora na Kraków albo przesuń pinezkę; obszar zmienisz zmiennymi `FINDINI_PILOT_*`.
+- **Serwer nadal odrzuca miejscowości poza Krakowem** — przebuduj API (`docker compose up -d --build api`) i usuń stare nadpisania `FINDINI_PILOT_*` z konfiguracji środowiska. Domyślny obszar obejmuje Polskę z marginesem przy granicy; nie jest ścisłym wielokątem granicy państwa.
 - **AI „missing_model”** w `/health` — uruchom `download_model.py`; katalog `models/` jest montowany do kontenera tylko do odczytu.
 - **Pobieranie modelu: błąd certyfikatu SSL** (Python z python.org na macOS) — skrypt użyje `certifi`, jeśli jest zainstalowany (`pip install certifi`), albo uruchom „Install Certificates.command”.
 - **Obraz `postgis/postgis` nie działa na arm64** — dlatego baza jest budowana z `pgvector/pgvector` + PostGIS z repozytorium PGDG (`infra/db/Dockerfile`).

@@ -1,5 +1,7 @@
 # Raport z testów i weryfikacji
 
+Bieżąca weryfikacja po rozszerzeniu na Polskę i zmianie modelu: [10.11.2026 — 71 testów, nowe APK i obciążenie](ZMIANY_2026_11_10.md). Poniżej pozostaje historyczny zapis z 07.11.2026.
+
 Data: 7 listopada 2026. Wszystkie wyniki poniżej pochodzą z faktycznie uruchomionych poleceń; pozycje niezweryfikowane są wyraźnie oznaczone na końcu.
 
 **Środowisko:** MacBook z Apple M5 (10 rdzeni, 32 GB RAM), macOS (Darwin 27.0), Docker Desktop 29.9 (VM: 10 CPU, 16 GB), PostgreSQL 17 + pgvector 0.8.7 + PostGIS 3.7, Python 3.12, emulator Android (obraz `google_apis` Android 12 / API 31, arm64, 1080×2400).

@@ -119,24 +119,24 @@ fun PhotoSearchScreen(nav: NavController) {
             }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = {
+                    Button(shape = MaterialTheme.shapes.small, onClick = {
                         if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) camera = true
                         else camPerm.launch(Manifest.permission.CAMERA)
                     }, modifier = Modifier.weight(1f)) { Icon(Icons.Outlined.CameraAlt, null); Spacer(Modifier.width(6.dp)); Text("Aparat") }
-                    OutlinedButton(onClick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, modifier = Modifier.weight(1f)) {
+                    OutlinedButton(shape = MaterialTheme.shapes.small, onClick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, modifier = Modifier.weight(1f)) {
                         Icon(Icons.Outlined.PhotoLibrary, null); Spacer(Modifier.width(6.dp)); Text("Galeria")
                     }
                 }
             }
             preview?.let { p ->
-                item { AsyncImage(p, "Zdjęcie zapytania", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxWidth().height(180.dp).clip(MaterialTheme.shapes.large)) }
+                item { AsyncImage(p, "Zdjęcie zapytania", contentScale = ContentScale.Fit, modifier = Modifier.fillMaxWidth().height(180.dp).clip(MaterialTheme.shapes.large)) }
             }
             when {
                 loading -> item { LoadingBox("Porównuję zdjęcia…") }
                 error != null -> item {
                     if (error!!.kind == AppError.Kind.AiUnavailable) {
                         EmptyState(Icons.Outlined.ImageSearch, "Analiza zdjęć chwilowo niedostępna", error!!.message) {
-                            Button(onClick = { nav.popBackStack() }) { Text("Szukaj filtrami") }
+                            Button(shape = MaterialTheme.shapes.small, onClick = { nav.popBackStack() }) { Text("Szukaj filtrami") }
                         }
                     } else ErrorState(error!!, onRetry = bytes?.let { b -> { run(b) } })
                 }
@@ -161,7 +161,7 @@ fun PhotoSearchScreen(nav: NavController) {
                     }
                     if (r.items.isEmpty()) item {
                         EmptyState(Icons.Outlined.ImageSearch, "Nic podobnego", "Dodaj zgłoszenie zguby ze zdjęciem — porównamy je z nowymi znaleziskami.") {
-                            Button(onClick = { nav.navigate("create?kind=lost") }) { Text("Dodaj zgłoszenie zguby") }
+                            Button(shape = MaterialTheme.shapes.small, onClick = { nav.navigate("create?kind=lost") }) { Text("Dodaj zgłoszenie zguby") }
                         }
                     }
                     items(r.items, key = { it.id }) { rep ->

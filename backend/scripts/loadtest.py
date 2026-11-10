@@ -38,11 +38,19 @@ CATS = ["electronics", "keys", "clothing", "bags", "wallets", "jewelry", "access
 COLORS = ["black", "white", "gray", "blue", "navy", "red", "green", "brown"]
 WORDS = ["czapka", "plecak", "klucze", "telefon", "portfel", "zegarek", "okulary", "słuchawki", "torebka"]
 PHRASES = [
-    "zgubiłem czarną czapkę wczoraj przy AGH",
-    "znalazłem klucze na Kazimierzu",
+    "zgubiłem czarną czapkę wczoraj w Warszawie",
+    "znalazłem klucze w Gdańsku",
     "srebrny laptop Dell 3 dni temu",
     "niebieski plecak dworzec",
 ]
+
+NATIONWIDE = False
+CITIES = [(52.23, 21.01), (50.06, 19.94), (54.35, 18.65), (51.11, 17.03), (53.43, 14.55), (50.04, 22.0)]
+
+
+def center() -> tuple[float, float]:
+    lat, lon = random.choice(CITIES) if NATIONWIDE else (50.06, 19.94)
+    return lat + random.uniform(-0.02, 0.02), lon + random.uniform(-0.03, 0.03)
 
 
 def _jpeg() -> bytes:
@@ -93,9 +101,10 @@ async def user(
             if op == "search":
                 p: dict[str, Any] = {"limit": 20}
                 if random.random() < 0.7:
+                    lat, lon = center()
                     p |= {
-                        "lat": 50.06 + random.uniform(-0.03, 0.03),
-                        "lon": 19.94 + random.uniform(-0.05, 0.05),
+                        "lat": lat,
+                        "lon": lon,
                         "radius_m": random.choice([1000, 2000, 5000]),
                     }
                 if random.random() < 0.5:
@@ -112,8 +121,10 @@ async def user(
                     p["cursor"] = resp.json()["next_cursor"]
                     code = (await client.get("/v1/reports", params=p)).status_code
             elif op == "areas":
-                lat, lon = 50.06 + random.uniform(-0.02, 0.02), 19.94 + random.uniform(-0.04, 0.04)
+                lat, lon = center()
                 bbox = f"{lon - 0.04},{lat - 0.025},{lon + 0.04},{lat + 0.025}"
+                if NATIONWIDE and random.random() < 0.3:
+                    bbox = "13,48,25,56"
                 code = (await client.get("/v1/reports/areas", params={"bbox": bbox})).status_code
             elif op == "detail":
                 code = (await client.get(f"/v1/reports/{random.choice(ids)}")).status_code
@@ -132,6 +143,7 @@ async def user(
                     code = (await client.get("/v1/me", headers=h)).status_code
             elif op == "create":
                 now = datetime.now(UTC)
+                lat, lon = center()
                 body = {
                     "kind": random.choice(["lost", "found"]),
                     "category": "clothing",
@@ -142,8 +154,8 @@ async def user(
                     "occurred_from": (now - timedelta(hours=3)).isoformat(),
                     "occurred_to": now.isoformat(),
                     "location": {
-                        "lat": 50.06 + random.uniform(-0.02, 0.02),
-                        "lon": 19.94 + random.uniform(-0.03, 0.03),
+                        "lat": lat,
+                        "lon": lon,
                         "source": "map",
                     },
                 }
@@ -195,6 +207,7 @@ async def run(base: str, users: int, duration: int, out: str | None, think: floa
     total = sum(len(v) for v in st.lat.values())
     allv = [x for v in st.lat.values() for x in v]
     report = {
+        "geography": "Polska" if NATIONWIDE else "Kraków",
         "users": users,
         "think_max_s": think,
         "duration_s": round(elapsed, 1),
@@ -232,6 +245,8 @@ if __name__ == "__main__":
     ap.add_argument("--users", type=int, default=50)
     ap.add_argument("--duration", type=int, default=120)
     ap.add_argument("--out")
+    ap.add_argument("--nationwide", action="store_true")
     ap.add_argument("--think", type=float, default=1.0, help="maks. czas myślenia (s); 0 = bez przerw (stres)")
     a = ap.parse_args()
+    NATIONWIDE = a.nationwide
     asyncio.run(run(a.base, a.users, a.duration, a.out, a.think))

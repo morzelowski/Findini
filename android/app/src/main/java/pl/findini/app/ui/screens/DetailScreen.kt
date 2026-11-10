@@ -75,6 +75,7 @@ import pl.findini.app.ui.components.SectionTitle
 import pl.findini.app.ui.components.StatusPill
 import pl.findini.app.ui.components.Tone
 import pl.findini.app.util.Format
+import androidx.compose.foundation.clickable
 
 fun holdingLabel(h: String?): String? = when (h) {
     "with_finder" -> "U znalazcy"
@@ -85,7 +86,7 @@ fun holdingLabel(h: String?): String? = when (h) {
 
 fun shareReport(context: android.content.Context, baseUrl: String, r: Report) {
     val kind = if (r.isFound) "Znaleziono" else "Zgubiono"
-    val text = "$kind: ${r.title} (${r.area.label ?: "Kraków"}). Szczegóły i prywatny kontakt w Findini: " +
+    val text = "$kind: ${r.title} (${r.area.label ?: "Polska"}). Szczegóły i prywatny kontakt w Findini: " +
         baseUrl.trimEnd('/') + "/r/${r.id}"
     val send = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
@@ -130,7 +131,7 @@ fun DetailScreen(nav: NavController, id: String, snackbar: SnackbarHostState) {
             report?.let { r ->
                 BottomActions {
                     if (r.isFound) {
-                        Button(onClick = { nav.navigate("claim/${r.id}") }, modifier = Modifier.fillMaxWidth()) {
+                        Button(shape = MaterialTheme.shapes.small, onClick = { nav.navigate("claim/${r.id}") }, modifier = Modifier.fillMaxWidth()) {
                             Text("To moje — złóż prywatne roszczenie")
                         }
                         Text(
@@ -139,7 +140,7 @@ fun DetailScreen(nav: NavController, id: String, snackbar: SnackbarHostState) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     } else {
-                        Button(onClick = { nav.navigate("create?kind=found&from=${r.id}") }, modifier = Modifier.fillMaxWidth()) {
+                        Button(shape = MaterialTheme.shapes.small, onClick = { nav.navigate("create?kind=found&from=${r.id}") }, modifier = Modifier.fillMaxWidth()) {
                             Text("Znalazłem coś podobnego")
                         }
                         Text(
@@ -178,6 +179,10 @@ fun DetailScreen(nav: NavController, id: String, snackbar: SnackbarHostState) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ReportBody(r: Report, meta: pl.findini.app.data.Meta?, imageUrl: (String) -> String, modifier: Modifier, ownerExtras: @Composable () -> Unit = {}) {
+    var photoPage by remember { mutableStateOf<Int?>(null) }
+    photoPage?.let { page ->
+        pl.findini.app.ui.components.PhotoViewer(r.photos, page, imageUrl) { photoPage = null }
+    }
     Column(modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         if (r.photos.isNotEmpty()) {
             val pager = rememberPagerState(pageCount = { r.photos.size })
@@ -186,8 +191,8 @@ fun ReportBody(r: Report, meta: pl.findini.app.data.Meta?, imageUrl: (String) ->
                     AsyncImage(
                         model = imageUrl(r.photos[i].url),
                         contentDescription = "Zdjęcie ${i + 1} z ${r.photos.size}: ${r.title}",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerLow).clickable { photoPage = i },
                     )
                 }
                 if (r.photos.size > 1) {
@@ -201,6 +206,7 @@ fun ReportBody(r: Report, meta: pl.findini.app.data.Meta?, imageUrl: (String) ->
                     }
                 }
             }
+            TextButton(onClick = { photoPage = pager.currentPage }, modifier = Modifier.align(Alignment.End)) { Text("Powiększ zdjęcie") }
         } else {
             PhotoOrIcon(r, imageUrl, Modifier.fillMaxWidth().height(140.dp).padding(16.dp))
         }
@@ -212,7 +218,7 @@ fun ReportBody(r: Report, meta: pl.findini.app.data.Meta?, imageUrl: (String) ->
             }
             Text(r.title, style = MaterialTheme.typography.headlineSmall)
             MetaLine(Icons.Outlined.Schedule, (if (r.isFound) "Znaleziono: " else "Zgubiono: ") + Format.window(r.occurredFrom, r.occurredTo))
-            MetaLine(Icons.Outlined.Place, (r.area.label ?: "Kraków") + " · obszar ok. " + Format.radius(r.area.radiusM))
+            MetaLine(Icons.Outlined.Place, (r.area.label ?: "Polska") + " · obszar ok. " + Format.radius(r.area.radiusM))
             r.publishedAt?.let { Text("Dodano " + Format.ago(it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             ColorDots(r.colors, meta)
             if (r.description.isNotBlank()) {
@@ -285,7 +291,7 @@ fun AbuseDialog(onDismiss: () -> Unit, onSend: (String, String) -> Unit) {
                 Text("Zgłoszenie trafi do moderatora. Po kilku zgłoszeniach ogłoszenie jest automatycznie ukrywane.", style = MaterialTheme.typography.bodySmall)
             }
         },
-        confirmButton = { Button(onClick = { onSend(sel, details) }) { Text("Wyślij") } },
+        confirmButton = { Button(shape = MaterialTheme.shapes.small, onClick = { onSend(sel, details) }) { Text("Wyślij") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Anuluj") } },
     )
 }

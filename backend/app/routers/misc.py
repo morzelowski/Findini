@@ -6,7 +6,7 @@ import html
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse
 from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
@@ -16,7 +16,8 @@ from app import __version__, ratelimit
 from app.config import get_settings
 from app.db import get_db
 from app.domain import categories as cats
-from app.domain.nlquery import LANDMARKS, nearest_landmark, parse_query
+from app.domain.nlquery import nearest_landmark, parse_query
+from app.domain.places import nearest_place, popular_places, search_places
 from app.errors import ApiError, conflict, not_found
 from app.models import AbuseReport, Claim, Guest, Message, Report, Session
 from app.schemas import AbuseIn, AdminResolveIn, ParseIn, iso
@@ -64,7 +65,7 @@ def meta() -> dict[str, Any]:
             },
             "grid_cell_m": s.grid_cell_m,
         },
-        "landmarks": [{k: v for k, v in lm.items() if k != "aliases"} for lm in LANDMARKS],
+        "landmarks": popular_places(),
         "ai": {"status": eng.status if eng.status != "not_loaded" else ("ready" if eng.load() else eng.status)},
         "safety_tips": SAFETY_TIPS,
         "retention": {
@@ -82,9 +83,19 @@ def parse(body: ParseIn) -> dict[str, Any]:
 
 
 @router.get("/v1/places/suggest")
-def place_suggest(lat: float, lon: float) -> dict[str, Any]:
+def place_suggest(
+    lat: float = Query(ge=-90, le=90),
+    lon: float = Query(ge=-180, le=180),
+) -> dict[str, Any]:
     lm = nearest_landmark(lat, lon)
+    if lm is None:
+        lm = nearest_place(lat, lon)
     return {"label": f"okolice: {lm['name']}" if lm else None}
+
+
+@router.get("/v1/places")
+def places(q: str = Query(min_length=2, max_length=80)) -> dict[str, Any]:
+    return {"items": search_places(q), "attribution": "© GeoNames, CC BY 4.0"}
 
 
 # ------------------------------------------------------------- nadużycia
@@ -280,7 +291,7 @@ def share_page(report_id: uuid.UUID, db: DbSession = Depends(get_db)) -> HTMLRes
       {img}
       <p>{esc(r.description)}</p>
       <ul>{attrs}{f"<li>Kolor: {esc(colors)}</li>" if colors else ""}</ul>
-      <p class="muted">Przybliżony obszar: {esc(r.area_label or "Kraków")} · kiedy: {r.occurred_from:%d.%m.%Y}</p>
+      <p class="muted">Przybliżony obszar: {esc(r.area_label or "Polska")} · kiedy: {r.occurred_from:%d.%m.%Y}</p>
       <p><strong>To Twoja rzecz?</strong> Otwórz zgłoszenie w aplikacji Findini i złóż prywatne roszczenie.
       Nikt nie poprosi Cię o opłatę ani przelew.</p>
       <p class="muted">Identyfikator zgłoszenia: {esc(str(r.id))}</p>

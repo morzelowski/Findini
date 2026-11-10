@@ -9,14 +9,14 @@ Krzysztof Czaplicki · Aleksandra Łabęda · Mateusz Orzełowski
 - Podobnych rzeczy jest dużo (setki czarnych czapek) — kategoria i kolor nie wystarczą, a ogłoszenia w grupach społecznościowych bywają przynętą dla oszustów.
 
 ## Rozwiązanie
-Aplikacja na Androida z prawdziwym backendem. Pilotaż: Kraków.
+Aplikacja na Androida z prawdziwym backendem. Zasięg: cała Polska, lokalny katalog miejscowości.
 1. **Szukaj od razu, bez konta:** lista i mapa z przybliżonymi obszarami, filtry, asystent „zdanie → filtry”, wyszukiwanie zdjęciem.
 2. **Zgłoś w minutę:** zdjęcie (aparat/galeria), miejsce zdarzenia (GPS z ręczną korektą), czas, cechy; podpowiedź kategorii z AI; widać, co jest publiczne, a co prywatne.
 3. **Dopasowania z wyjaśnieniem** (wyróżnik): „ta sama kategoria · kolor czarny · ok. 300 m · zgodny czas”, ostrzeżenia o niezgodnościach, „brak przekonujących dopasowań” zamiast fałszywej pewności; powiadomienia o nowych kandydatach.
 4. **Bezpieczny zwrot:** ukryty szczegół zna tylko właściciel → prywatne roszczenie → decyzja znalazcy → czat w sprawie → jednorazowy kod przekazania w miejscu publicznym → potwierdzenie → ❤.
 
 ## Architektura
-`Android (Kotlin, Compose, CameraX, MapLibre)` ⇄ `HTTPS` ⇄ `FastAPI` → `PostgreSQL + PostGIS + pgvector` · `wolumen zdjęć (bez EXIF)` · `CLIP ViT‑B/32 w ONNX (lokalnie)` — całość w `docker compose`; HTTPS przez Caddy.
+`Android (Kotlin, Compose, CameraX, MapLibre)` ⇄ `HTTPS` ⇄ `FastAPI` → `PostgreSQL + PostGIS + pgvector` · `wolumen zdjęć (bez EXIF)` · `CLIP ViT‑B/16 w ONNX (lokalnie)` — całość w `docker compose`; HTTPS przez Caddy.
 
 Kluczowe decyzje: publiczna lokalizacja = środek komórki ~500 m (zapytania nie zdradzają punktu); dane prywatne w osobnej tabeli; sesja gościa z tokenem w Android Keystore i kodem odzyskiwania; maszyna stanów zwrotu z blokadami i unikalnym indeksem (brak podwójnego wydania).
 
@@ -43,3 +43,5 @@ Kluczowe decyzje: publiczna lokalizacja = środek komórki ~500 m (zapytania nie
 
 ## Zrzuty ekranu do posteru
 `docs/zrzuty/02b_asystent_lista.png`, `03_mapa.png`, `09_podsumowanie_publiczne_prywatne.png`, `12_ocena_roszczenia.png`, `13_kod_przekazania_czat.png`, `14_zwrot_zakonczony.png`, `15_wyszukiwanie_zdjeciem.png`.
+
+Aktualne porównanie modeli i testy: [10.11.2026](ZMIANY_2026_11_10.md).

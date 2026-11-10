@@ -151,8 +151,8 @@ fun MineScreen(nav: NavController) {
                     tab == 0 && reports!!.isEmpty() -> item {
                         EmptyState(Icons.Outlined.Inventory2, "Nie masz jeszcze zgłoszeń", "Zgubiłeś lub znalazłeś coś? Zgłoszenie zajmuje około minuty i nie wymaga konta.") {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(onClick = { nav.navigate("create?kind=found") }) { Text("Znalazłem") }
-                                OutlinedButton(onClick = { nav.navigate("create?kind=lost") }) { Text("Zgubiłem") }
+                                Button(shape = MaterialTheme.shapes.small, onClick = { nav.navigate("create?kind=found") }) { Text("Znalazłem") }
+                                OutlinedButton(shape = MaterialTheme.shapes.small, onClick = { nav.navigate("create?kind=lost") }) { Text("Zgubiłem") }
                             }
                             TextButton(onClick = { nav.navigate("recovery") }) { Text("Mam kod odzyskiwania z innego telefonu") }
                         }

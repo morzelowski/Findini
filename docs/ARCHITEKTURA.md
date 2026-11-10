@@ -18,7 +18,7 @@ flowchart LR
   subgraph Serwer["docker compose"]
     API[FastAPI / uvicorn\nwalidacja, autoryzacja, limity] --> DB[(PostgreSQL 17\nPostGIS + pgvector + pg_trgm)]
     API --> FS[(Wolumen zdjęć\nlosowe nazwy, bez EXIF)]
-    API --> AI[CLIP ViT-B/32 ONNX\nlokalnie, CPU]
+    API --> AI[CLIP ViT-B/16 ONNX\nlokalnie, CPU]
     JOBS[Wątek zadań: indeksowanie,\nretencja, porządki] --> DB
     JOBS --> AI
     CADDY[Caddy: HTTPS\nprofil 'https'] -.-> API
@@ -56,7 +56,7 @@ sequenceDiagram
 | FastAPI + SQLAlchemy + Alembic | Prosty, typowany kontrakt, OpenAPI za darmo, ten sam język co model AI | Ktor (ten sam język co app, ale słabsze środowisko ML), Node |
 | PostgreSQL + PostGIS + pgvector w jednej bazie | Geowyszukiwanie (`geography`, `ST_DWithin`, GiST), podobieństwo wektorów i tekst (pg_trgm) w jednym zapytaniu i jednej transakcji | Osobny silnik wektorowy/Elasticsearch — nadmiarowe przy 10 tys. rekordów |
 | Publiczna lokalizacja = środek komórki siatki ~500 m | Wszystkie punkty z komórki dają identyczną odpowiedź ⇒ seria zapytań „w promieniu” nie odtworzy ukrytego punktu (test `test_repeated_radius_queries_do_not_reveal_exact_point`) | Losowy szum przy każdym zapytaniu — uśrednianie odpowiedzi ujawnia punkt |
-| Lokalny CLIP w ONNX Runtime | Bez kluczy, kosztów i wysyłania zdjęć do zewnętrznych firm; działa na CPU (~20–30 ms); jeden model daje embeddingi i zero‑shot | API chmurowe (koszt, prywatność, zależność), DINOv2 (lepsze egzemplarze, ale bez opisów tekstowych) |
+| Lokalny CLIP B/16 w ONNX Runtime | Bez kluczy, kosztów i wysyłania zdjęć do zewnętrznych firm; działa na CPU (~49 ms, CPU, 2 wątki); jeden model daje embeddingi i zero‑shot | API chmurowe (koszt, prywatność, zależność), DINOv2 (lepsze egzemplarze, ale bez opisów tekstowych) |
 | Asystent wyszukiwania na regułach | Deterministyczny, bez kluczy, bez ryzyka prompt injection; wystarcza dla słownika kategorii/kolorów/czasu/miejsc | LLM — opcjonalne rozszerzenie (patrz „Rozszerzenia”) |
 | Sesja gościa z losowym tokenem + kod odzyskiwania | Szukanie bez konta, publikacja bez danych osobowych, a jednocześnie prawdziwa autoryzacja zasobów | Konto e‑mail (bariera), identyfikator urządzenia (nie jest uwierzytelnieniem) |
 | Roszczenia tylko do zgłoszeń „znaleziono” | Jedna, spójna maszyna stanów; decyzję o wydaniu zawsze podejmuje osoba fizycznie mająca przedmiot. Przy zgubie znalazca dodaje zgłoszenie „znaleziono” („Znalazłem coś podobnego”), a właściciel dostaje je w dopasowaniach | Dwa symetryczne przepływy — więcej stanów, niejasne, kto decyduje |
@@ -145,7 +145,15 @@ Reguły są zakodowane w `backend/app/domain/states.py` (testy jednostkowe) i eg
 - `work/UpdatesWorker` — okresowe sprawdzanie dopasowań i wiadomości (bez lokalizacji).
 
 ## Rozszerzenia (niezaimplementowane, świadomie)
-- Opcjonalny LLM do asystenta (np. Claude) — tylko jako parser do edytowalnych filtrów, z walidacją schematu i limitem kosztu; treść ogłoszeń nigdy jako instrukcje.
+- Opcjonalny model językowy do asystenta — tylko jako parser do edytowalnych filtrów, z walidacją schematu i limitem kosztu; treść ogłoszeń nigdy jako instrukcje.
 - Push przez FCM/UnifiedPush zamiast odpytywania.
 - Maskowanie fragmentów zdjęcia na telefonie (rozmycie wskazanego obszaru) z podglądem wyniku.
 - DINOv2 jako drugi model do podobieństwa egzemplarzy (lepsze rozróżnianie, kosztem drugiego modelu).
+
+## Zasięg ogólnopolski (10.11.2026)
+
+Katalog miejscowości jest częścią API (`domain/places.py`, skompresowane dane GeoNames, CC BY 4.0). `GET /v1/places?q=` wyszukuje do 20 wyników z województwem i powiatem, bez zewnętrznego geokodera. Niektóre nazwy w danych źródłowych mogą być nieaktualne lub niepełne; GPS i mapa pozostają alternatywą.
+
+Zasięg mapy i walidacji to domyślnie Polska z niewielkim marginesem (prostokąt). Odniesienie siatki (`grid_reference_lat=50.0614`) pozostaje stałe, niezależnie od centrum mapy. Nie ma zmiany lokalizacji istniejących zgłoszeń ani migracji danych. Mapa kraju grupuje publiczne komórki w większe obszary; dotknięcie grupy przybliża mapę. Lista i mapa stosują ten sam zestaw filtrów.
+
+Nowe tokeny mają 384 bity losowości. Nowe kody odzyskiwania mają 160 bitów oraz 20-bitową sumę kontrolną (suma nie dodaje entropii); odczyt w czasie odzyskiwania blokuje wiersz gościa. Nowe kody przekazania mają osiem cyfr, a rozpoczęte sprawy zachowują wcześniejsze sześć.

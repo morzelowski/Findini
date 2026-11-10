@@ -26,7 +26,7 @@ TEST_URL = ADMIN_URL.rsplit("/", 1)[0] + f"/{TEST_DB}"
 os.environ["FINDINI_ENV"] = "test"
 os.environ["FINDINI_DATABASE_URL"] = TEST_URL
 os.environ["FINDINI_STORAGE_DIR"] = tempfile.mkdtemp(prefix="findini-photos-")
-os.environ["FINDINI_AI_MODEL_DIR"] = str(ROOT / "models" / "clip-vit-b32")
+os.environ["FINDINI_AI_MODEL_DIR"] = str(ROOT / "models" / "clip-vit-b16")
 os.environ["FINDINI_BACKGROUND_JOBS"] = "false"
 os.environ["FINDINI_ADMIN_TOKEN"] = "test-admin-token-0123456789abcdef"
 os.environ["FINDINI_SERVER_SECRET"] = "test-secret-0123456789abcdef0123456789abcdef"

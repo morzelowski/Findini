@@ -1,0 +1,124 @@
+{
+ "geography": "Polska",
+ "users": 50,
+ "think_max_s": 1.0,
+ "duration_s": 120.9,
+ "requests": 9789,
+ "rps": 81.0,
+ "overall": {
+  "p50_ms": 6.6,
+  "p95_ms": 25.0,
+  "p99_ms": 196.8,
+  "errors_5xx_or_network": 0
+ },
+ "per_op": {
+  "areas": {
+   "n": 1236,
+   "p50_ms": 6.9,
+   "p95_ms": 14.4,
+   "p99_ms": 28.2,
+   "max_ms": 121.7,
+   "mean_ms": 8.7,
+   "errors": 0,
+   "codes": {
+    "200": 1236
+   }
+  },
+  "create": {
+   "n": 510,
+   "p50_ms": 7.6,
+   "p95_ms": 16.4,
+   "p99_ms": 31.7,
+   "max_ms": 50.9,
+   "mean_ms": 9.0,
+   "errors": 0,
+   "codes": {
+    "201": 510
+   }
+  },
+  "detail": {
+   "n": 1528,
+   "p50_ms": 4.1,
+   "p95_ms": 9.7,
+   "p99_ms": 21.8,
+   "max_ms": 132.1,
+   "mean_ms": 5.2,
+   "errors": 0,
+   "codes": {
+    "200": 1528
+   }
+  },
+  "matches": {
+   "n": 594,
+   "p50_ms": 13.5,
+   "p95_ms": 39.5,
+   "p99_ms": 58.1,
+   "max_ms": 209.1,
+   "mean_ms": 17.4,
+   "errors": 0,
+   "codes": {
+    "200": 594
+   }
+  },
+  "me": {
+   "n": 637,
+   "p50_ms": 4.2,
+   "p95_ms": 9.4,
+   "p99_ms": 31.0,
+   "max_ms": 122.8,
+   "mean_ms": 5.4,
+   "errors": 0,
+   "codes": {
+    "200": 637
+   }
+  },
+  "parse": {
+   "n": 503,
+   "p50_ms": 5.6,
+   "p95_ms": 9.5,
+   "p99_ms": 13.5,
+   "max_ms": 536.1,
+   "mean_ms": 8.1,
+   "errors": 0,
+   "codes": {
+    "200": 503
+   }
+  },
+  "photo_search": {
+   "n": 220,
+   "p50_ms": 190.6,
+   "p95_ms": 295.3,
+   "p99_ms": 319.0,
+   "max_ms": 372.6,
+   "mean_ms": 214.7,
+   "errors": 0,
+   "codes": {
+    "200": 220
+   }
+  },
+  "photo_thumb": {
+   "n": 1041,
+   "p50_ms": 4.8,
+   "p95_ms": 11.9,
+   "p99_ms": 81.8,
+   "max_ms": 269.7,
+   "mean_ms": 7.1,
+   "errors": 0,
+   "codes": {
+    "200": 1041
+   }
+  },
+  "search": {
+   "n": 3520,
+   "p50_ms": 7.9,
+   "p95_ms": 21.3,
+   "p99_ms": 42.9,
+   "max_ms": 214.2,
+   "mean_ms": 10.6,
+   "errors": 0,
+   "codes": {
+    "200": 3520
+   }
+  }
+ }
+}

@@ -14,6 +14,9 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface FindiniApi {
+    @GET("v1/places")
+    suspend fun places(@Query("q") query: String): PlacesResponse
+
     @GET("v1/meta")
     suspend fun meta(): Meta
 
@@ -64,6 +67,15 @@ interface FindiniApi {
         @Query("bbox") bbox: String,
         @Query("kind") kind: String? = null,
         @Query("category") category: String? = null,
+        @Query("subtype") subtype: String? = null,
+        @Query("colors") colors: String? = null,
+        @Query("brand") brand: String? = null,
+        @Query("q") q: String? = null,
+        @Query("lat") lat: Double? = null,
+        @Query("lon") lon: Double? = null,
+        @Query("radius_m") radiusM: Int? = null,
+        @Query("date_from") dateFrom: String? = null,
+        @Query("date_to") dateTo: String? = null,
     ): AreasResponse
 
     @GET("v1/reports/{id}")

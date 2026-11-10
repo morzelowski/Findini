@@ -162,7 +162,7 @@ def test_abuse_on_foreign_claim_not_allowed(client, guest_factory):
 def test_meta_and_parse(client):
     meta = client.get("/v1/meta").json()
     assert {c["key"] for c in meta["categories"]} >= {"electronics", "keys", "clothing", "bags", "wallets", "jewelry"}
-    assert meta["pilot"]["name"] == "Kraków"
+    assert meta["pilot"]["name"] == "Polska"
     p = client.post("/v1/search/parse", json={"text": "zgubiłem czarną czapkę wczoraj przy AGH"}).json()
     assert p["kind"] == "found" and p["category"] == "clothing" and p["colors"] == ["black"]
     assert p["place"]["key"] == "agh" and p["date_from"]

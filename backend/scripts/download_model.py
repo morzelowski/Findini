@@ -1,7 +1,7 @@
 """Pobiera lokalny model CLIP ViT-B/32 (ONNX) używany przez Findini.
 
 Źródło: https://huggingface.co/Xenova/clip-vit-base-patch32 (licencja MIT,
-eksport ONNX modelu openai/clip-vit-base-patch32). Rewizja jest przypięta,
+eksport ONNX). Rewizja jest przypięta,
 a każdy plik weryfikowany sumą SHA-256 — nie pobieramy "najnowszej" wersji
 w ciemno.
 
@@ -41,6 +41,21 @@ OPTIONAL_QUANTIZED = {
     ),
 }
 
+B16_REPO = "Xenova/clip-vit-base-patch16"
+B16_REVISION = "342fdf2f67aded64d138ff074745fb4a5d2bba5f"
+B16_FILES = {
+    "onnx/vision_model.onnx": (
+        345060583,
+        "b5170b47c0ecc667c9af5b42ed460c341377706d1466d177798c65fe49ea1e6b",
+    ),
+    "onnx/text_model_quantized.onnx": (
+        64504507,
+        "9106b51e6c663a56b99182ec617c2b3d53577b037e7e24a7717eb78048a0c97a",
+    ),
+    "tokenizer.json": (2224081, None),
+    "preprocessor_config.json": (520, None),
+}
+
 
 def _ssl_context() -> ssl.SSLContext:
     """Python z python.org na macOS nie ma domyślnie magazynu CA — użyj certifi, jeśli jest."""
@@ -60,13 +75,13 @@ def sha256_of(path: Path) -> str:
     return h.hexdigest()
 
 
-def fetch(rel: str, size: int, sha: str | None, dest: Path) -> None:
+def fetch(rel: str, size: int, sha: str | None, dest: Path, repo: str = REPO, revision: str = REVISION) -> None:
     target = dest / rel
     if target.exists() and target.stat().st_size == size and (sha is None or sha256_of(target) == sha):
         print(f"[ok]   {rel} (już pobrany)")
         return
     target.parent.mkdir(parents=True, exist_ok=True)
-    url = f"https://huggingface.co/{REPO}/resolve/{REVISION}/{rel}"
+    url = f"https://huggingface.co/{repo}/resolve/{revision}/{rel}"
     tmp = target.with_suffix(target.suffix + ".part")
     print(f"[get]  {rel} ({size / 1e6:.1f} MB)")
     req = urllib.request.Request(url, headers={"User-Agent": "findini-model-downloader/1.0"})
@@ -91,16 +106,18 @@ def fetch(rel: str, size: int, sha: str | None, dest: Path) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     root = Path(__file__).resolve().parents[2]
-    parser.add_argument("--dest", default=str(root / "models" / "clip-vit-b32"))
+    parser.add_argument("--model", choices=["b16", "b32"], default="b16")
+    parser.add_argument("--dest")
     parser.add_argument("--with-quantized", action="store_true", help="pobierz też wersję int8 (do eksperymentu)")
     args = parser.parse_args()
-    dest = Path(args.dest)
-    files = dict(FILES)
-    if args.with_quantized:
+    dest = Path(args.dest) if args.dest else root / "models" / f"clip-vit-{args.model}"
+    repo, revision = (B16_REPO, B16_REVISION) if args.model == "b16" else (REPO, REVISION)
+    files = dict(B16_FILES if args.model == "b16" else FILES)
+    if args.with_quantized and args.model == "b32":
         files.update(OPTIONAL_QUANTIZED)
     for rel, (size, sha) in files.items():
-        fetch(rel, size, sha, dest)
-    (dest / "REVISION").write_text(f"{REPO}@{REVISION}\n")
+        fetch(rel, size, sha, dest, repo, revision)
+    (dest / "REVISION").write_text(f"{repo}@{revision}\n")
     print(f"Model gotowy w {dest}")
 
 

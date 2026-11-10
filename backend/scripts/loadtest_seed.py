@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import re
 import uuid
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -44,12 +45,18 @@ def main() -> None:
     ap.add_argument("--reports", type=int, default=10_000)
     ap.add_argument("--guests", type=int, default=1_000)
     ap.add_argument("--photo-key", default="", help="istniejący storage_key zdjęcia (do testu GET /photos)")
+    ap.add_argument("--nationwide", action="store_true", help="rozłóż dane wokół miast całej Polski")
+    ap.add_argument("--embedding-file", type=Path)
+    ap.add_argument("--embedding-model")
+    ap.add_argument("--model-dir", type=Path, default=ROOT / "models" / "clip-vit-b16")
     args = ap.parse_args()
     rnd = random.Random(42)
     np_rnd = np.random.default_rng(42)
 
     admin_url = args.db.rsplit("/", 1)[0] + "/findini"
     name = args.db.rsplit("/", 1)[1]
+    if not re.fullmatch(r"findini_load(?:_[a-z0-9_]+)?", name):
+        raise SystemExit("Skrypt resetuje tylko bazę testową o nazwie findini_load lub findini_load_…")
     eng = create_engine(admin_url, isolation_level="AUTOCOMMIT")
     with eng.connect() as c:
         c.execute(text(f"DROP DATABASE IF EXISTS {name} WITH (FORCE)"))
@@ -62,13 +69,37 @@ def main() -> None:
     cfg.attributes["database_url"] = args.db
     command.upgrade(cfg, "head")
 
-    # embeddingi bazowe z eksperymentu (jeśli dostępne) — inaczej losowe
-    base = None
-    emb_file = ROOT / "data" / "abo" / "embeddings_fp32.npy"
-    if emb_file.exists():
-        base = np.load(emb_file)
+    # Nigdy nie oznaczamy wektorów B/32 jako B/16. Domyślnie liczymy prawdziwe
+    # embeddingi zdjęć demonstracyjnych modelem używanym w nowej instalacji.
+    if args.embedding_file:
+        if not args.embedding_model:
+            raise SystemExit("Podaj --embedding-model zgodny z plikiem wektorów.")
+        base = np.load(args.embedding_file, allow_pickle=False)
+        model_id = args.embedding_model
+        if base.ndim != 2 or base.shape[1] != 512 or not len(base) or not np.isfinite(base).all():
+            raise SystemExit("Plik musi zawierać skończone wektory N×512.")
+    else:
+        from PIL import Image
+
+        from app.services.ai import AiEngine
+
+        model = AiEngine(model_dir=args.model_dir)
+        if not model.load():
+            raise SystemExit("Pobierz model: python backend/scripts/download_model.py")
+        base = np.stack(
+            [
+                model._embed_sync(Image.open(p).convert("RGB"))
+                for p in sorted((ROOT / "backend" / "scripts" / "demo_photos").glob("*.jpg"))
+            ]
+        )
+        model_id = model.model_version
     db = create_engine(args.db)
     now = datetime.now(UTC)
+    locations = LANDMARKS
+    if args.nationwide:
+        from app.domain.places import popular_places
+
+        locations = [(p["lat"], p["lon"]) for p in popular_places()]
     guests = [uuid.uuid4() for _ in range(args.guests)]
     with db.begin() as c:
         c.execute(text("INSERT INTO guests(id, alias) VALUES (:id, 'Loadtest')"), [{"id": g} for g in guests])
@@ -79,7 +110,7 @@ def main() -> None:
             attrs = {}
             if sub_attr and sub_attr.options:
                 attrs["subtype"] = rnd.choice(sub_attr.options)
-            lm = rnd.choice(LANDMARKS)
+            lm = rnd.choice(locations)
             lat = lm[0] + np_rnd.normal(0, 0.012)
             lon = lm[1] + np_rnd.normal(0, 0.018)
             area = public_area(lat, lon, rnd.choice([0, 0, 0, 300, 800]))
@@ -113,10 +144,7 @@ def main() -> None:
             )
             priv.append({"id": rid, "lat": lat, "lon": lon})
             if rnd.random() < 0.3:
-                if base is not None:
-                    v = base[rnd.randrange(len(base))] + np_rnd.normal(0, 0.03, 512)
-                else:
-                    v = np_rnd.normal(0, 1, 512)
+                v = base[rnd.randrange(len(base))] + np_rnd.normal(0, 0.03, 512)
                 v = v / np.linalg.norm(v)
                 photos.append(
                     {
@@ -126,6 +154,7 @@ def main() -> None:
                         "key": args.photo_key or "00/00000000000000000000000000000000.jpg",
                         "tkey": (args.photo_key or "00/00000000000000000000000000000000.jpg").replace(".jpg", "_t.jpg"),
                         "emb": str([round(float(x), 6) for x in v]),
+                        "model": model_id,
                     }
                 )
         c.execute(
@@ -148,7 +177,7 @@ def main() -> None:
             INSERT INTO photos(id, owner_id, report_id, purpose, storage_key, thumb_key, width, height, bytes, sha256,
               embedding, embedding_model, embedding_status)
             VALUES (:id, :owner, :rid, 'report', :key, :tkey, 800, 600, 50000, 'x',
-              CAST(:emb AS vector), 'clip-vit-b32@6b7c523/fp32', 'ready')
+              CAST(:emb AS vector), :model, 'ready')
         """),
             photos,
         )

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.MapsUgc
@@ -34,6 +35,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
@@ -127,7 +129,7 @@ fun MapBox(
             ) {
                 Icon(Icons.Outlined.MapsUgc, null, Modifier.size(40.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(
-                    "Mapa jest niedostępna (brak sieci lub serwera kafelków). Możesz korzystać z listy i wybrać miejsce z listy punktów.",
+                    "Mapa jest niedostępna. Możesz korzystać z listy i wyszukać miejscowość po nazwie.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -142,6 +144,7 @@ fun ExploreMap(
     modifier: Modifier,
     center: LatLng,
     areas: List<AreaCell>,
+    zoom: Double = 5.2,
     onBboxChanged: (Bbox, Double) -> Unit,
     onAreaClick: (AreaCell) -> Unit,
 ) {
@@ -150,10 +153,12 @@ fun ExploreMap(
     val lostColor = kind.lostStrong.toArgb()
     val mixed = MaterialTheme.colorScheme.tertiary.toArgb()
     var styleRef by remember { mutableStateOf<Style?>(null) }
+    var mapRef by remember { mutableStateOf<MapLibreMap?>(null) }
     val areasState by rememberUpdatedState(areas)
     val clickState by rememberUpdatedState(onAreaClick)
     val bboxState by rememberUpdatedState(onBboxChanged)
-    MapBox(modifier, center, 12.5, "Mapa z przybliżonymi obszarami zgłoszeń") { map, style ->
+    MapBox(modifier, center, zoom, "Mapa z przybliżonymi obszarami zgłoszeń") { map, style ->
+        mapRef = map
         style.addSource(GeoJsonSource("areas"))
         style.addSource(GeoJsonSource("labels"))
         style.addLayer(
@@ -189,11 +194,18 @@ fun ExploreMap(
             val f = map.queryRenderedFeatures(p, "areas-fill").firstOrNull()
             val id = f?.getStringProperty("cell")
             val cell = areasState.firstOrNull { it.cellId == id }
-            if (cell != null) clickState(cell)
+            if (cell != null) {
+                if (cell.cellId.startsWith("cluster:")) {
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(cell.lat, cell.lon), map.cameraPosition.zoom + 2.0))
+                } else clickState(cell)
+            }
             cell != null
         }
         val b = map.projection.visibleRegion.latLngBounds
         bboxState(Bbox(b.longitudeWest, b.latitudeSouth, b.longitudeEast, b.latitudeNorth), map.cameraPosition.zoom)
+    }
+    LaunchedEffect(mapRef, center.latitude, center.longitude, zoom) {
+        mapRef?.animateCamera(CameraUpdateFactory.newLatLngZoom(center, zoom))
     }
     LaunchedEffect(styleRef, areas) {
         val style = styleRef ?: return@LaunchedEffect
@@ -238,6 +250,7 @@ fun PickerMap(
     initial: LatLng,
     uncertaintyM: Int,
     recenter: LatLng?,
+    hasLocation: Boolean = true,
     onCenter: (LatLng) -> Unit,
 ) {
     var mapRef by remember { mutableStateOf<MapLibreMap?>(null) }
@@ -246,14 +259,21 @@ fun PickerMap(
     val onCenterState by rememberUpdatedState(onCenter)
     val primary = String.format("#%06X", 0xFFFFFF and MaterialTheme.colorScheme.primary.toArgb())
     Box(modifier) {
-        MapBox(Modifier.fillMaxSize(), initial, 15.5, "Mapa wyboru miejsca. Przesuń mapę, aby ustawić pinezkę.") { map, style ->
+        MapBox(Modifier.fillMaxSize(), initial, if (hasLocation) 14.0 else 5.2, "Mapa wyboru miejsca. Przesuń mapę, aby ustawić pinezkę.") { map, style ->
             style.addSource(GeoJsonSource("unc"))
             style.addLayer(FillLayer("unc-fill", "unc").withProperties(PropertyFactory.fillColor(primary), PropertyFactory.fillOpacity(0.15f)))
             style.addLayer(LineLayer("unc-line", "unc").withProperties(PropertyFactory.lineColor(primary), PropertyFactory.lineWidth(1.5f)))
+            var userMoved = false
+            map.addOnCameraMoveStartedListener { reason ->
+                if (reason == MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE) userMoved = true
+            }
             map.addOnCameraIdleListener {
                 val t = map.cameraPosition.target ?: return@addOnCameraIdleListener
                 center = t
-                onCenterState(t)
+                if (userMoved) {
+                    onCenterState(t)
+                    userMoved = false
+                }
             }
             mapRef = map
             styleRef = style

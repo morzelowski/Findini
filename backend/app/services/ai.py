@@ -32,7 +32,7 @@ log = logging.getLogger("findini.ai")
 
 MEAN = np.array([0.48145466, 0.4578275, 0.40821073], dtype=np.float32).reshape(3, 1, 1)
 STD = np.array([0.26862954, 0.26130258, 0.27577711], dtype=np.float32).reshape(3, 1, 1)
-LOGIT_SCALE = 100.0  # skala CLIP (exp(logit_scale) z modelu OpenAI)
+LOGIT_SCALE = 100.0  # skala CLIP: exp(logit_scale)
 COLOR_TEMPLATES = [
     "a photo of a {} object",
     "a {} colored item",
@@ -84,10 +84,14 @@ class AiEngine:
         self.error: str | None = None
         self.variant = "fp32" if "quantized" not in self.vision_file else "int8"
         rev = "unknown"
+        family = "clip-vit-b32"  # zgodność dotychczasowych instalacji
         rev_file = self.model_dir / "REVISION"
         if rev_file.exists():
-            rev = rev_file.read_text().strip().split("@")[-1][:7]
-        self.model_version = f"clip-vit-b32@{rev}/{self.variant}"
+            source = rev_file.read_text().strip()
+            rev = source.split("@")[-1][:7]
+            if "patch16@" in source:
+                family = "clip-vit-b16"
+        self.model_version = f"{family}@{rev}/{self.variant}"
         self._pool = ThreadPoolExecutor(max_workers=max(1, s.ai_max_concurrency), thread_name_prefix="ai")
         self._pending = 0
         self._pending_lock = threading.Lock()

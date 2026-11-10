@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -39,6 +40,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import pl.findini.app.BuildConfig
@@ -95,9 +100,9 @@ fun SettingsScreen(nav: NavController, snackbar: SnackbarHostState) {
             ClickableRow(Icons.Outlined.DeleteForever, "Usuń wszystkie moje dane", "Zgłoszenia, zdjęcia, roszczenia, rozmowy i sesja — nieodwracalnie") { confirmDelete = true }
             HorizontalDivider()
             SectionTitle("O aplikacji")
-            ClickableRow(Icons.Outlined.Info, "Findini ${BuildConfig.VERSION_NAME} · pilotaż: ${meta?.pilot?.name ?: "Kraków"}", "Projekt studencki: K. Czaplicki, A. Łabęda, M. Orzełowski") {}
+            ClickableRow(Icons.Outlined.Info, "Findini ${BuildConfig.VERSION_NAME} · obszar: ${meta?.pilot?.name ?: "Polska"}", "Projekt studencki: K. Czaplicki, A. Łabęda, M. Orzełowski") {}
             Text(
-                "Mapa: MapLibre, kafelki OpenFreeMap, dane © współtwórcy OpenStreetMap. Analiza zdjęć: lokalny model CLIP ViT-B/32 (licencja MIT) na serwerze Findini — " +
+                "Mapa: MapLibre, kafelki OpenFreeMap, dane © współtwórcy OpenStreetMap. Miejscowości: © GeoNames (CC BY 4.0). Analiza zdjęć: lokalny model CLIP ViT-B/16 lub B/32 (konfiguracja serwera) (licencja MIT) na serwerze Findini — " +
                     "zdjęcia nie trafiają do zewnętrznych usług. Asystent wyszukiwania działa na regułach, bez AI. Krój pisma: Plus Jakarta Sans (SIL OFL 1.1). " +
                     "Status AI: ${meta?.ai?.status ?: "nieznany"}.",
                 style = MaterialTheme.typography.bodySmall,
@@ -108,7 +113,7 @@ fun SettingsScreen(nav: NavController, snackbar: SnackbarHostState) {
                 SectionTitle("Serwer (wersja deweloperska)")
                 OutlinedTextField(server, { server = it.trim() }, label = { Text("Adres API") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 Text("Emulator: http://10.0.2.2:8080/ · telefon w tej samej sieci Wi-Fi: http://IP-komputera:8080/ · USB: adb reverse + http://localhost:8080/", style = MaterialTheme.typography.bodySmall)
-                Button(onClick = {
+                Button(shape = MaterialTheme.shapes.small, onClick = {
                     repo.setServerUrl(if (server.endsWith("/")) server else "$server/")
                     scope.launch { repo.forgetSession(); repo.loadMeta(force = true); snackbar.showSnackbar("Zapisano adres serwera") }
                 }) { Text("Zapisz") }
@@ -124,16 +129,15 @@ fun SettingsScreen(nav: NavController, snackbar: SnackbarHostState) {
             text = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium) {
-                        Text(c, style = Mono.copy(fontSize = MaterialTheme.typography.titleMedium.fontSize), modifier = Modifier.padding(12.dp))
+                        Text(displayCode(c), style = Mono.copy(fontSize = MaterialTheme.typography.titleMedium.fontSize, letterSpacing = 1.sp), modifier = Modifier.padding(12.dp))
                     }
                     Spacer(Modifier.height(8.dp))
                     Text("Zapisz go w bezpiecznym miejscu (np. menedżer haseł). Pokazujemy go tylko teraz — serwer przechowuje jedynie jego skrót. Nie udostępniaj go nikomu.", style = MaterialTheme.typography.bodySmall)
                 }
             },
             confirmButton = {
-                Button(onClick = {
-                    val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    cm.setPrimaryClip(ClipData.newPlainText("Kod Findini", c))
+                Button(shape = MaterialTheme.shapes.small, onClick = {
+                    copyRecoveryCode(context, c)
                     code = null
                 }) { Text("Kopiuj i zamknij") }
             },
@@ -146,7 +150,7 @@ fun SettingsScreen(nav: NavController, snackbar: SnackbarHostState) {
             title = { Text("Usunąć wszystkie dane?") },
             text = { Text("Usuniemy z serwera Twoje zgłoszenia, zdjęcia, roszczenia i rozmowy oraz zakończymy sesję. Osoby, z którymi rozmawiałeś, stracą dostęp do tych spraw. Tego nie da się cofnąć.") },
             confirmButton = {
-                Button(onClick = {
+                Button(shape = MaterialTheme.shapes.small, onClick = {
                     confirmDelete = false
                     scope.launch {
                         when (val r = repo.private { deleteMe() }) {
@@ -179,16 +183,22 @@ fun RecoveryScreen(nav: NavController) {
     var busy by remember { mutableStateOf(false) }
 
     ScreenScaffold(title = "Przywróć dostęp", onBack = { nav.popBackStack() }) { mod ->
-        Column(mod.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(mod.fillMaxSize().imePadding().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Wpisz kod odzyskiwania z poprzedniego telefonu.", style = MaterialTheme.typography.bodyLarge)
             InfoCard(
                 null,
                 "Po przywróceniu: stara sesja (np. na zgubionym telefonie) zostanie wylogowana, a kod — wymieniony na nowy. Zgłoszenia utworzone na tym telefonie przed przywróceniem pozostaną w poprzedniej sesji.",
                 Tone.Info,
             )
-            OutlinedTextField(code, { code = it.uppercase().take(29) }, label = { Text("Kod, np. 7K2M-QX9D-…") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(
+                code, { code = it.uppercase(java.util.Locale.ROOT).take(64) },
+                label = { Text("Kod odzyskiwania") },
+                supportingText = { Text("Wklej cały kod. Akceptujemy również wcześniejsze, krótsze kody.") },
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters, autoCorrectEnabled = false, keyboardType = KeyboardType.Password),
+                singleLine = true, modifier = Modifier.fillMaxWidth(),
+            )
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            Button(onClick = {
+            Button(shape = MaterialTheme.shapes.small, onClick = {
                 busy = true
                 scope.launch {
                     when (val r = repo.recover(code)) {
@@ -208,17 +218,28 @@ fun RecoveryScreen(nav: NavController) {
                 Column {
                     Text("Stary kod przestał działać. Zapisz nowy:")
                     Spacer(Modifier.height(8.dp))
-                    Text(c, style = Mono.copy(fontSize = MaterialTheme.typography.titleMedium.fontSize))
+                    Text(displayCode(c), style = Mono.copy(fontSize = MaterialTheme.typography.titleMedium.fontSize, letterSpacing = 1.sp))
                 }
             },
             confirmButton = {
-                Button(onClick = {
-                    val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    cm.setPrimaryClip(ClipData.newPlainText("Kod Findini", c))
+                Button(shape = MaterialTheme.shapes.small, onClick = {
+                    copyRecoveryCode(context, c)
                     newCode = null
                     nav.navigate("mine") { popUpTo("home") }
                 }) { Text("Kopiuj i przejdź do moich spraw") }
             },
         )
     }
+}
+
+private fun displayCode(code: String): String = code.split("-").chunked(3).joinToString("\n") { it.joinToString("-") }
+
+private fun copyRecoveryCode(context: Context, code: String) {
+    val clip = ClipData.newPlainText("Kod Findini", code)
+    if (android.os.Build.VERSION.SDK_INT >= 33) {
+        clip.description.extras = android.os.PersistableBundle().apply {
+            putBoolean(android.content.ClipDescription.EXTRA_IS_SENSITIVE, true)
+        }
+    }
+    (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(clip)
 }

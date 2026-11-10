@@ -24,6 +24,7 @@ from app.security import (
     new_token,
     now_utc,
     random_alias,
+    valid_recovery_code,
 )
 from app.services import claims as claim_svc
 from app.services import photos as photo_svc
@@ -56,7 +57,9 @@ def create_session(request: Request, db: DbSession = Depends(get_db)) -> dict[st
 @router.post("/sessions/recover", status_code=201)
 def recover(body: RecoverIn, request: Request, db: DbSession = Depends(get_db)) -> dict[str, Any]:
     ratelimit.check(db, "recover", None, ip_key(request))
-    guest = db.scalar(select(Guest).where(Guest.recovery_hash == hash_recovery_code(body.code)))
+    if not valid_recovery_code(body.code):
+        raise ApiError(404, "bad_recovery_code", "Nieprawidłowy kod odzyskiwania. Sprawdź wszystkie grupy znaków.")
+    guest = db.scalar(select(Guest).where(Guest.recovery_hash == hash_recovery_code(body.code)).with_for_update())
     if guest is None or guest.deleted_at is not None:
         raise ApiError(404, "bad_recovery_code", "Nieprawidłowy kod odzyskiwania.")
     if guest.banned_at is not None:

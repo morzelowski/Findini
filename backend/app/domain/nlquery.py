@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 
 from app.domain.categories import CATEGORY_BY_KEY, COLOR_PL
 from app.domain.matching import norm
+from app.domain.places import city_in_text
 
 TZ = ZoneInfo("Europe/Warsaw")
 
@@ -331,8 +332,20 @@ def parse_query(raw: str, now: datetime | None = None) -> Parsed:
                 consumed.append(stem)
                 break
 
+    city = city_in_text(text)
+    if city:
+        place, forms = city
+        p.place = place | {"radius_m": 10000}
+        p.understood.append(f"Miejsce: {place['name']} (10 km)")
+        consumed += forms
     for lm in LANDMARKS:
-        if any(a in text for a in lm["aliases"]):
+        # Nazwy „rynek”, „dworzec” czy „politechnika” nie identyfikują miasta.
+        specific = [
+            a
+            for a in lm["aliases"]
+            if a not in {"rynek", "sukiennic", "dworzec", "dworc", "collegium", "politechnik", "ekonomiczn", "arena"}
+        ]
+        if any(a in text for a in specific) and (not city or city[0]["name"] == "Kraków"):
             p.place = {"key": lm["key"], "name": lm["name"], "lat": lm["lat"], "lon": lm["lon"], "radius_m": 1500}
             p.understood.append(f"Miejsce: okolice — {lm['name']} (1,5 km)")
             consumed += lm["aliases"]

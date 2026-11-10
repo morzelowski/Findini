@@ -20,28 +20,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pl.findini.app.R
 
-/*
- * Kierunek wizualny „Ulga”: spokojna, głęboka zieleń morska (zaufanie, porządek) +
- * ciepła morela (życzliwość, ludzki gest) na ciepłym, papierowym tle. Zaokrąglone, miękkie
- * kształty, dużo światła, mapa i zdjęcia bez dekoracji. Zgubione/znalezione rozróżniamy
- * kolorem ORAZ ikoną i podpisem (nie tylko kolorem).
- */
-
-private val Sea = Color(0xFF0F5B57)
-private val SeaLight = Color(0xFF7FD3C7)
-private val Apricot = Color(0xFFE07A4F)
-private val Paper = Color(0xFFFBF8F3)
-private val Ink = Color(0xFF14302E)
+// Spokojna paleta katalogu: granat, neutralne powierzchnie i oszczędne akcenty.
+private val Sea = Color(0xFF234E70)
+private val SeaLight = Color(0xFFA5C9EB)
+private val Apricot = Color(0xFFB96332)
+private val Paper = Color(0xFFF6F7F9)
+private val Ink = Color(0xFF1B2936)
 
 private val LightColors = lightColorScheme(
     primary = Sea,
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFCFEDE6),
-    onPrimaryContainer = Color(0xFF00201D),
+    primaryContainer = Color(0xFFE0ECF7),
+    onPrimaryContainer = Color(0xFF102B43),
     secondary = Color(0xFFA2492A),
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFFD9E8E4),
-    onSecondaryContainer = Color(0xFF0B3A36),
+    secondaryContainer = Color(0xFFE7ECF2),
+    onSecondaryContainer = Color(0xFF273E52),
     tertiary = Color(0xFF4F5D9A),
     onTertiary = Color.White,
     tertiaryContainer = Color(0xFFDEE1FF),
@@ -50,15 +44,15 @@ private val LightColors = lightColorScheme(
     onBackground = Ink,
     surface = Paper,
     onSurface = Ink,
-    surfaceVariant = Color(0xFFEDE6DD),
-    onSurfaceVariant = Color(0xFF4F5A58),
+    surfaceVariant = Color(0xFFE8EDF2),
+    onSurfaceVariant = Color(0xFF566573),
     surfaceContainerLowest = Color.White,
-    surfaceContainerLow = Color(0xFFF6F2EC),
-    surfaceContainer = Color(0xFFF1ECE5),
-    surfaceContainerHigh = Color(0xFFEBE5DD),
-    surfaceContainerHighest = Color(0xFFE5DED5),
-    outline = Color(0xFF7A7470),
-    outlineVariant = Color(0xFFD5CEC6),
+    surfaceContainerLow = Color(0xFFF1F4F7),
+    surfaceContainer = Color(0xFFEBEFF4),
+    surfaceContainerHigh = Color(0xFFE5EAF0),
+    surfaceContainerHighest = Color(0xFFDEE5ED),
+    outline = Color(0xFF75818D),
+    outlineVariant = Color(0xFFCFD8E1),
     error = Color(0xFFB3261E),
     onError = Color.White,
     errorContainer = Color(0xFFF9DEDC),
@@ -67,28 +61,28 @@ private val LightColors = lightColorScheme(
 
 private val DarkColors = darkColorScheme(
     primary = SeaLight,
-    onPrimary = Color(0xFF00382F),
-    primaryContainer = Color(0xFF0C4B45),
-    onPrimaryContainer = Color(0xFFCFEDE6),
+    onPrimary = Color(0xFF103348),
+    primaryContainer = Color(0xFF244862),
+    onPrimaryContainer = Color(0xFFE0ECF7),
     secondary = Color(0xFFFFB596),
     onSecondary = Color(0xFF5A1C03),
     secondaryContainer = Color(0xFF2C4A46),
-    onSecondaryContainer = Color(0xFFD9E8E4),
+    onSecondaryContainer = Color(0xFFE7ECF2),
     tertiary = Color(0xFFBAC3FF),
     onTertiary = Color(0xFF212F6A),
     tertiaryContainer = Color(0xFF384582),
     onTertiaryContainer = Color(0xFFDEE1FF),
-    background = Color(0xFF0F1514),
+    background = Color(0xFF111820),
     onBackground = Color(0xFFDDE4E2),
-    surface = Color(0xFF0F1514),
+    surface = Color(0xFF111820),
     onSurface = Color(0xFFDDE4E2),
     surfaceVariant = Color(0xFF3F4947),
     onSurfaceVariant = Color(0xFFBEC9C6),
     surfaceContainerLowest = Color(0xFF0A0F0E),
-    surfaceContainerLow = Color(0xFF171D1C),
-    surfaceContainer = Color(0xFF1B2120),
-    surfaceContainerHigh = Color(0xFF252B2A),
-    surfaceContainerHighest = Color(0xFF303635),
+    surfaceContainerLow = Color(0xFF18212B),
+    surfaceContainer = Color(0xFF1E2935),
+    surfaceContainerHigh = Color(0xFF263340),
+    surfaceContainerHighest = Color(0xFF303F4E),
     outline = Color(0xFF899391),
     outlineVariant = Color(0xFF3F4947),
 )
@@ -114,8 +108,8 @@ private val Jakarta = FontFamily(jakarta(400), jakarta(500), jakarta(600), jakar
 
 private val AppTypography = Typography().run {
     copy(
-        displaySmall = displaySmall.copy(fontFamily = Jakarta, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.5).sp),
-        headlineLarge = headlineLarge.copy(fontFamily = Jakarta, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.5).sp),
+        displaySmall = displaySmall.copy(fontFamily = Jakarta, fontWeight = FontWeight.Bold, letterSpacing = (-0.5).sp),
+        headlineLarge = headlineLarge.copy(fontFamily = Jakarta, fontWeight = FontWeight.Bold, letterSpacing = (-0.5).sp),
         headlineMedium = headlineMedium.copy(fontFamily = Jakarta, fontWeight = FontWeight.Bold, letterSpacing = (-0.25).sp),
         headlineSmall = headlineSmall.copy(fontFamily = Jakarta, fontWeight = FontWeight.Bold),
         titleLarge = titleLarge.copy(fontFamily = Jakarta, fontWeight = FontWeight.Bold),
@@ -131,11 +125,11 @@ private val AppTypography = Typography().run {
 }
 
 private val AppShapes = Shapes(
-    extraSmall = RoundedCornerShape(8.dp),
-    small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(18.dp),
-    large = RoundedCornerShape(24.dp),
-    extraLarge = RoundedCornerShape(32.dp),
+    extraSmall = RoundedCornerShape(4.dp),
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(12.dp),
+    large = RoundedCornerShape(16.dp),
+    extraLarge = RoundedCornerShape(20.dp),
 )
 
 val Mono = TextStyle(fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 30.sp, letterSpacing = 6.sp)

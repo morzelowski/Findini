@@ -104,7 +104,8 @@ def test_full_recovery_flow(client, guest_factory):
 
     # 6. Przekazanie: odbiorca pokazuje kod, znalazca go wpisuje.
     code = owner.get(f"/v1/claims/{cid}").json()["handover_code"]
-    assert code and len(code) == 6
+    assert code and len(code) == 8
+    assert finder.get(f"/v1/claims/{cid}").json()["handover_code_length"] == 8
     bad = finder.post(f"/v1/claims/{cid}/handover", json={"code": "000000" if code != "000000" else "111111"})
     assert bad.status_code == 422 and bad.json()["error"]["attempts_left"] == 4
     ok = finder.post(f"/v1/claims/{cid}/handover", json={"code": code})

@@ -115,6 +115,7 @@ import pl.findini.app.ui.components.categoryIcon
 import pl.findini.app.util.Format
 import pl.findini.app.util.Images
 import pl.findini.app.util.LocationHelper
+import androidx.compose.material.icons.outlined.Search
 import java.io.File
 import java.time.LocalDate
 import java.time.LocalTime
@@ -168,8 +169,6 @@ class CreateVM(private val repo: Repository, private val drafts: DraftStore) : V
             kind = kind,
             fromIso = Format.toUtcIso(if (kind == "found") now.minusMinutes(30) else now.minusHours(3)),
             toIso = Format.toUtcIso(now),
-            lat = meta?.pilot?.center?.lat,
-            lon = meta?.pilot?.center?.lon,
         )
         ui.update { it.copy(draft = d) }
         if (fromId != null) viewModelScope.launch {
@@ -444,8 +443,8 @@ fun CreateScreen(nav: NavController, kind: String, editId: String?, fromReportId
                     else -> !ui.publishing && (d.photoPaths.isEmpty() || ui.photoConfirmed)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (step > 0) OutlinedButton(onClick = { vm.edit { it.copy(step = step - 1) } }) { Text("Wstecz") }
-                    Button(
+                    if (step > 0) OutlinedButton(shape = MaterialTheme.shapes.small, onClick = { vm.edit { it.copy(step = step - 1) } }) { Text("Wstecz") }
+                    Button(shape = MaterialTheme.shapes.small,
                         onClick = {
                             if (step < 3) {
                                 if (step == 2 && d.title.isBlank()) vm.edit { it.copy(title = suggestTitle(it, meta)) }
@@ -545,13 +544,13 @@ private fun PhotoStep(vm: CreateVM, ui: CreateUi, meta: Meta?, onCamera: () -> U
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = {
+            Button(shape = MaterialTheme.shapes.small, onClick = {
                 if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) onCamera()
                 else camPerm.launch(Manifest.permission.CAMERA)
             }, modifier = Modifier.weight(1f)) {
                 Icon(Icons.Outlined.CameraAlt, null); Spacer(Modifier.width(6.dp)); Text("Aparat")
             }
-            OutlinedButton(onClick = {
+            OutlinedButton(shape = MaterialTheme.shapes.small, onClick = {
                 picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             }, modifier = Modifier.weight(1f)) {
                 Icon(Icons.Outlined.PhotoLibrary, null); Spacer(Modifier.width(6.dp)); Text("Galeria")
@@ -604,7 +603,7 @@ private fun PhotoTile(path: String, state: UploadState?, vm: CreateVM) {
     val repo = LocalContext.current.app.repo
     val model: Any = if (path.startsWith("remote:")) repo.absolute("/v1/photos/${path.removePrefix("remote:")}?size=thumb") else File(path)
     Box(Modifier.size(104.dp).clip(MaterialTheme.shapes.medium)) {
-        AsyncImage(model = model, contentDescription = "Dodane zdjęcie", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        AsyncImage(model = model, contentDescription = "Dodane zdjęcie", contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
         Surface(color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f), shape = MaterialTheme.shapes.small, modifier = Modifier.align(Alignment.BottomStart).padding(4.dp)) {
             Row(Modifier.padding(horizontal = 6.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                 when (state) {
@@ -653,6 +652,7 @@ private fun PlaceTimeStep(vm: CreateVM, ui: CreateUi, meta: Meta?) {
     var locDenied by remember { mutableStateOf(false) }
     var showDate by remember { mutableStateOf(false) }
     var timePick by remember { mutableStateOf<String?>(null) }
+    var placeSearch by remember { mutableStateOf(false) }
     val perm = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { res ->
         if (res.values.any { it }) vm.locate(context) else locDenied = true
     }
@@ -668,16 +668,22 @@ private fun PlaceTimeStep(vm: CreateVM, ui: CreateUi, meta: Meta?) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        val start = if (d.lat != null && d.lon != null) LatLng(d.lat, d.lon) else LatLng(meta?.pilot?.center?.lat ?: 50.0614, meta?.pilot?.center?.lon ?: 19.9366)
+        OutlinedButton(shape = MaterialTheme.shapes.small, onClick = { placeSearch = true }, modifier = Modifier.fillMaxWidth()) {
+            Icon(Icons.Outlined.Search, null)
+            Spacer(Modifier.width(8.dp))
+            Text("Wyszukaj miejscowość w Polsce")
+        }
+        val start = if (d.lat != null && d.lon != null) LatLng(d.lat, d.lon) else LatLng(meta?.pilot?.center?.lat ?: 52.0, meta?.pilot?.center?.lon ?: 19.0)
         PickerMap(
             modifier = Modifier.fillMaxWidth().height(280.dp).clip(MaterialTheme.shapes.large),
             initial = start,
             uncertaintyM = maxOf(d.uncertaintyM, d.accuracyM ?: 0),
             recenter = ui.recenter,
+            hasLocation = d.lat != null && d.lon != null,
             onCenter = vm::mapMoved,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            OutlinedButton(onClick = {
+            OutlinedButton(shape = MaterialTheme.shapes.small, onClick = {
                 if (LocationHelper.hasPermission(context)) vm.locate(context)
                 else perm.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
             }) {
@@ -694,18 +700,14 @@ private fun PlaceTimeStep(vm: CreateVM, ui: CreateUi, meta: Meta?) {
         if (locDenied) {
             InfoCard("Bez dostępu do lokalizacji", "Nic nie szkodzi — przesuń mapę lub wybierz znane miejsce poniżej.", Tone.Info)
         }
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            meta?.landmarks?.take(8)?.forEach { lm ->
-                AssistChip(onClick = { vm.mapMoved(LatLng(lm.lat, lm.lon)); vm.edit { it.copy(locationSource = "map") }; vm.ui.update { it.copy(recenter = LatLng(lm.lat, lm.lon)) } }, label = { Text(lm.name) })
-            }
-        }
+        if (d.lat == null) Text("Wybierz miejscowość, użyj GPS lub przesuń mapę, aby wskazać miejsce zdarzenia.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
         Text("Nie jestem pewien dokładnego miejsca: ${if (d.uncertaintyM == 0) "znam miejsce" else "promień " + Format.radius(d.uncertaintyM)}", style = MaterialTheme.typography.labelLarge)
         Slider(value = d.uncertaintyM.toFloat(), onValueChange = { v -> vm.edit { it.copy(uncertaintyM = (v / 50).toInt() * 50) } }, valueRange = 0f..3000f)
         OutlinedTextField(
             value = d.areaLabel,
             onValueChange = { v -> vm.edit { it.copy(areaLabel = v.take(80)) } },
             label = { Text("Opis okolicy (publiczny)") },
-            supportingText = { Text("Np. „okolice: Kampus AGH, przystanek”. Bez adresu domowego.") },
+            supportingText = { Text("Np. „okolice dworca, przystanek”. Bez adresu domowego.") },
             leadingIcon = { Icon(Icons.Outlined.Public, "Publiczne") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -725,8 +727,8 @@ private fun PlaceTimeStep(vm: CreateVM, ui: CreateUi, meta: Meta?) {
             FilterChip(selected = false, onClick = { showDate = true }, label = { Text("Inny dzień…") })
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { timePick = "from" }, modifier = Modifier.weight(1f)) { Text("Od: ${Format.day(from)} ${Format.time(from)}") }
-            OutlinedButton(onClick = { timePick = "to" }, modifier = Modifier.weight(1f)) { Text("Do: ${Format.day(to)} ${Format.time(to)}") }
+            OutlinedButton(shape = MaterialTheme.shapes.small, onClick = { timePick = "from" }, modifier = Modifier.weight(1f)) { Text("Od: ${Format.day(from)} ${Format.time(from)}") }
+            OutlinedButton(shape = MaterialTheme.shapes.small, onClick = { timePick = "to" }, modifier = Modifier.weight(1f)) { Text("Do: ${Format.day(to)} ${Format.time(to)}") }
         }
         Text("Podaj przedział, jeśli nie wiesz dokładnie — to pomaga w dopasowaniach.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
@@ -755,6 +757,19 @@ private fun PlaceTimeStep(vm: CreateVM, ui: CreateUi, meta: Meta?) {
         Spacer(Modifier.height(16.dp))
     }
 
+    if (placeSearch) {
+        pl.findini.app.ui.components.PlaceSearchSheet(
+            current = null, searchArea = false, onDismiss = { placeSearch = false },
+        ) { place ->
+            if (place != null) {
+                val ll = LatLng(place.lat, place.lon)
+                vm.mapMoved(ll)
+                vm.edit { it.copy(areaLabel = "okolice: ${place.name}", locationSource = "map", uncertaintyM = 500) }
+                vm.ui.update { it.copy(recenter = ll) }
+            }
+            placeSearch = false
+        }
+    }
     if (showDate) {
         val state = rememberDatePickerState(
             initialSelectedDateMillis = from.toLocalDate().atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli(),
@@ -930,7 +945,7 @@ private fun ReviewStep(vm: CreateVM, ui: CreateUi, meta: Meta?) {
                 if (d.colors.isNotEmpty()) Text("Kolor: " + d.colors.mapNotNull { meta?.color(it)?.label }.joinToString(), style = MaterialTheme.typography.bodyMedium)
                 if (d.description.isNotBlank()) Text(d.description, style = MaterialTheme.typography.bodyMedium)
                 Text("Zdjęcia: ${d.photoPaths.size}", style = MaterialTheme.typography.bodyMedium)
-                Text("Obszar: ${d.areaLabel.ifBlank { "Kraków" }} (ok. 500 m, bez dokładnego punktu)", style = MaterialTheme.typography.bodyMedium)
+                Text("Obszar: ${d.areaLabel.ifBlank { "Polska" }} (ok. 500 m, bez dokładnego punktu)", style = MaterialTheme.typography.bodyMedium)
                 Text("Czas: " + Format.window(d.fromIso ?: "", d.toIso ?: ""), style = MaterialTheme.typography.bodyMedium)
                 if (d.kind == "found") holdingLabel(d.holding)?.let { Text("Przedmiot: $it" + (if (d.holdingNote.isNotBlank()) " — ${d.holdingNote}" else ""), style = MaterialTheme.typography.bodyMedium) }
             }

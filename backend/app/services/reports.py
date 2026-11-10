@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import json
+import math
 import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -549,10 +550,20 @@ def map_areas(
     category: str | None,
     date_from: datetime | None,
     date_to: datetime | None,
+    subtype: str | None = None,
+    colors: list[str] | None = None,
+    brand: str | None = None,
+    q: str | None = None,
+    lat: float | None = None,
+    lon: float | None = None,
+    radius_m: int | None = None,
 ) -> list[dict[str, Any]]:
     min_lon, min_lat, max_lon, max_lat = bbox
-    if max_lat - min_lat > 1.0 or max_lon - min_lon > 1.5:
-        raise invalid("bbox_too_large", "Przybliż mapę, aby zobaczyć zgłoszenia.")
+    settings = get_settings()
+    min_lon, max_lon = max(min_lon, settings.pilot_min_lon - 0.01), min(max_lon, settings.pilot_max_lon + 0.01)
+    min_lat, max_lat = max(min_lat, settings.pilot_min_lat - 0.01), min(max_lat, settings.pilot_max_lat + 0.01)
+    if min_lon > max_lon or min_lat > max_lat:
+        return []
     where = [
         "status IN ('active','reserved')",
         "hidden_at IS NULL",
@@ -564,21 +575,58 @@ def map_areas(
         where.append("kind = :kind")
         params["kind"] = kind
     if category:
+        cats.validate_category(category)
         where.append("category = :category")
         params["category"] = category
+    if subtype:
+        where.append("attributes->>'subtype' = :subtype")
+        params["subtype"] = subtype
+    if colors:
+        cats.validate_colors(colors)
+        params["colors"] = sorted({c for col in colors for c in [col, *NEAR_EXPAND.get(col, [])]} | {"multi"})
+        where.append("colors && CAST(:colors AS varchar[])")
+    if brand:
+        where.append("f_unaccent(lower(attributes->>'brand')) LIKE f_unaccent(lower(:brand))")
+        params["brand"] = "%" + brand.replace("%", "").replace("_", "")[:40] + "%"
+    if q:
+        params["q"] = clean_text(q, 120)
+        db.execute(text("SET LOCAL pg_trgm.word_similarity_threshold = 0.45"))
+        where.append(
+            "(f_unaccent(lower(:q)) <% f_unaccent(lower(search_text)) "
+            "OR f_unaccent(lower(search_text)) LIKE '%' || f_unaccent(lower(:q)) || '%')"
+        )
+    if lat is not None and lon is not None:
+        params.update(lat=lat, lon=lon, radius=radius_m or 3000)
+        where.append("ST_DWithin(public_geog, ST_SetSRID(ST_MakePoint(:lon,:lat),4326)::geography, :radius)")
     if date_from:
         where.append("occurred_to >= :dfrom")
         params["dfrom"] = date_from
     if date_to:
         where.append("occurred_from <= :dto")
         params["dto"] = date_to
+    # Przy dużym oddaleniu grupujemy WYŁĄCZNIE publiczne komórki. Liczba grup
+    # pozostaje ograniczona, a mapa kraju nie wymaga pobierania tysięcy kółek.
+    span = max((max_lat - min_lat) * 111320, (max_lon - min_lon) * 80000)
+    level = max(0, math.ceil(math.log2(max(1, span / (18 * settings.grid_cell_m)))))
+    cluster_m = settings.grid_cell_m * 2**level
+    params.update(step_lat=cluster_m / 111320, step_lon=cluster_m / 80000)
+    if level > 0:
+        group = "floor(public_lat / :step_lat), floor(public_lon / :step_lon)"
+        cell = (
+            f"'cluster:{level}:' || floor(public_lat / :step_lat)::text || ':' || floor(public_lon / :step_lon)::text"
+        )
+        position = "avg(public_lat) AS lat, avg(public_lon) AS lon"
+        radius = f"greatest(max(area_radius_m), {math.ceil(cluster_m * 1.42)})"
+    else:
+        group, cell = "cell_id", "cell_id"
+        position, radius = "min(public_lat) AS lat, min(public_lon) AS lon", "max(area_radius_m)"
     sql = f"""
-        SELECT cell_id, min(public_lat) AS lat, min(public_lon) AS lon, max(area_radius_m) AS radius,
+        SELECT {cell} AS cell_id, {position}, {radius} AS radius,
                count(*) AS n, count(*) FILTER (WHERE kind = 'lost') AS lost,
                count(*) FILTER (WHERE kind = 'found') AS found,
                (array_agg(id ORDER BY published_at DESC))[1:3] AS sample
         FROM reports WHERE {" AND ".join(where)}
-        GROUP BY cell_id ORDER BY n DESC LIMIT 400
+        GROUP BY {group} ORDER BY n DESC, cell_id LIMIT 400
     """
     rows = db.execute(text(sql), params).all()
     return [

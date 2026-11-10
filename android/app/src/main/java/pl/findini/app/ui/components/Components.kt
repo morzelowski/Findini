@@ -89,7 +89,7 @@ fun KindBadge(kind: String, modifier: Modifier = Modifier) {
     val found = kind == "found"
     Row(
         modifier
-            .clip(RoundedCornerShape(50))
+            .clip(RoundedCornerShape(6.dp))
             .background(if (found) k.found else k.lost)
             .padding(horizontal = 10.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -118,7 +118,7 @@ fun StatusPill(status: String) {
         "withdrawn" -> "Usunięte" to MaterialTheme.colorScheme.surfaceVariant
         else -> return
     }
-    Surface(color = color, shape = RoundedCornerShape(50)) {
+    Surface(color = color, shape = RoundedCornerShape(6.dp)) {
         Text(label, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
     }
 }
@@ -157,7 +157,7 @@ fun PhotoOrIcon(report: Report, imageUrl: (String) -> String, modifier: Modifier
             AsyncImage(
                 model = imageUrl(photo.thumbUrl),
                 contentDescription = "Zdjęcie: ${report.title}",
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
@@ -210,11 +210,12 @@ fun ReportCard(report: Report, meta: Meta?, imageUrl: (String) -> String, onClic
     Card(
         onClick = onClick,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(Modifier.padding(12.dp)) {
-            PhotoOrIcon(report, imageUrl, Modifier.size(92.dp))
+            PhotoOrIcon(report, imageUrl, Modifier.size(120.dp))
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -225,7 +226,7 @@ fun ReportCard(report: Report, meta: Meta?, imageUrl: (String) -> String, onClic
                 Spacer(Modifier.height(6.dp))
                 Text(report.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(2.dp))
-                MetaLine(Icons.Outlined.Place, listOfNotNull(report.area.label?.removePrefix("okolice: "), Format.distance(report.distanceM)).joinToString(" · ").ifBlank { "Kraków" })
+                MetaLine(Icons.Outlined.Place, listOfNotNull(report.area.label?.removePrefix("okolice: "), Format.distance(report.distanceM)).joinToString(" · ").ifBlank { "Polska" })
                 MetaLine(Icons.Outlined.Schedule, Format.window(report.occurredFrom, report.occurredTo))
                 ColorDots(report.colors, meta, Modifier.padding(top = 2.dp))
                 if (showReasons && report.match != null) {
@@ -263,8 +264,8 @@ fun InfoCard(title: String?, body: String, tone: Tone = Tone.Info, icon: ImageVe
     val cs = MaterialTheme.colorScheme
     val k = LocalKindColors.current
     val (bg, fg) = when (tone) {
-        Tone.Info -> cs.tertiaryContainer to cs.onTertiaryContainer
-        Tone.Privacy -> cs.primaryContainer to cs.onPrimaryContainer
+        Tone.Info -> cs.surfaceContainerLow to cs.onSurface
+        Tone.Privacy -> cs.surfaceContainerLow to cs.onSurface
         Tone.Warning -> k.lost to k.onLost
         Tone.Success -> cs.primaryContainer to cs.onPrimaryContainer
     }
@@ -274,7 +275,7 @@ fun InfoCard(title: String?, body: String, tone: Tone = Tone.Info, icon: ImageVe
         Tone.Success -> Icons.Outlined.CheckCircle
         Tone.Info -> Icons.Outlined.Info
     }
-    Surface(color = bg, contentColor = fg, shape = MaterialTheme.shapes.medium, modifier = modifier.fillMaxWidth()) {
+    Surface(color = bg, contentColor = fg, shape = MaterialTheme.shapes.small, modifier = modifier.fillMaxWidth()) {
         Row(Modifier.padding(14.dp)) {
             Icon(ic, null, Modifier.size(22.dp))
             Spacer(Modifier.width(10.dp))
@@ -315,7 +316,7 @@ fun ErrorState(error: AppError, onRetry: (() -> Unit)?, modifier: Modifier = Mod
         Text(error.message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         if (onRetry != null) {
             Spacer(Modifier.height(12.dp))
-            Button(onClick = onRetry) { Text("Spróbuj ponownie") }
+            Button(shape = MaterialTheme.shapes.small, onClick = onRetry) { Text("Spróbuj ponownie") }
         }
     }
 }
@@ -368,7 +369,7 @@ fun TextLink(text: String, onClick: () -> Unit) {
 
 @Composable
 fun SecondaryAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    OutlinedButton(onClick = onClick, modifier = modifier) { Text(text) }
+    OutlinedButton(shape = MaterialTheme.shapes.small, onClick = onClick, modifier = modifier) { Text(text) }
 }
 
 @Composable

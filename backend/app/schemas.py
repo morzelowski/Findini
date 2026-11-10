@@ -126,7 +126,7 @@ class MessageIn(StrictModel):
 
 
 class RecoverIn(StrictModel):
-    code: str = Field(min_length=10, max_length=40)
+    code: str = Field(min_length=10, max_length=64)
 
 
 class AbuseIn(StrictModel):

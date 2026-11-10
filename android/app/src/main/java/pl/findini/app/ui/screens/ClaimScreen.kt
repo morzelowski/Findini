@@ -111,7 +111,7 @@ fun ClaimScreen(nav: NavController, reportId: String) {
             form?.let { f ->
                 BottomActions {
                     if (f.canClaim) {
-                        Button(
+                        Button(shape = MaterialTheme.shapes.small,
                             onClick = {
                                 sending = true
                                 scope.launch {
@@ -130,7 +130,7 @@ fun ClaimScreen(nav: NavController, reportId: String) {
                             Text("Wyślij prywatnie do znalazcy")
                         }
                     } else if (f.existingClaimId != null) {
-                        Button(onClick = { nav.navigate("case/${f.existingClaimId}") }, modifier = Modifier.fillMaxWidth()) { Text("Przejdź do swojej sprawy") }
+                        Button(shape = MaterialTheme.shapes.small, onClick = { nav.navigate("case/${f.existingClaimId}") }, modifier = Modifier.fillMaxWidth()) { Text("Przejdź do swojej sprawy") }
                     }
                 }
             }
@@ -150,7 +150,7 @@ fun ClaimScreen(nav: NavController, reportId: String) {
                         Spacer(Modifier.width(12.dp))
                         Column {
                             Text(r.title, style = MaterialTheme.typography.titleMedium)
-                            Text(r.area.label ?: "Kraków", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(r.area.label ?: "Polska", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
@@ -191,7 +191,7 @@ fun ClaimScreen(nav: NavController, reportId: String) {
                 )
                 if (evidence != null) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        AsyncImage(evidence!!.first, "Zdjęcie dowodu", contentScale = ContentScale.Crop, modifier = Modifier.size(88.dp).clip(MaterialTheme.shapes.medium))
+                        AsyncImage(evidence!!.first, "Zdjęcie dowodu", contentScale = ContentScale.Fit, modifier = Modifier.size(88.dp).clip(MaterialTheme.shapes.medium))
                         IconButton(onClick = {
                             val id = evidence?.second
                             evidence = null
@@ -199,7 +199,7 @@ fun ClaimScreen(nav: NavController, reportId: String) {
                         }) { Icon(Icons.Outlined.Delete, "Usuń zdjęcie dowodu") }
                     }
                 } else {
-                    OutlinedButton(onClick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, enabled = !uploading) {
+                    OutlinedButton(shape = MaterialTheme.shapes.small, onClick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, enabled = !uploading) {
                         if (uploading) CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp) else Icon(Icons.Outlined.AddPhotoAlternate, null)
                         Spacer(Modifier.width(6.dp)); Text("Dodaj zdjęcie z galerii")
                     }

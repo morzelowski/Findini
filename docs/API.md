@@ -14,7 +14,7 @@ Ten dokument opisuje zasady i najważniejsze operacje.
 | Metoda i ścieżka | Opis |
 |---|---|
 | `GET /health` | stan bazy, magazynu zdjęć i modelu AI |
-| `GET /v1/meta` | kategorie z cechami (schemat formularzy), kolory, obszar pilotażu, punkty orientacyjne, retencja, wskazówki bezpieczeństwa, status AI |
+| `GET /v1/meta` | kategorie z cechami (schemat formularzy), kolory, obszar Polski, popularne miejscowości, retencja, wskazówki bezpieczeństwa, status AI |
 | `GET /v1/reports` | wyszukiwanie: `kind`, `category`, `subtype`, `colors` (lista), `brand`, `q`, `lat`+`lon`+`radius_m` (100–25 000), `bbox`, `date_from`/`date_to` (≤ 1 rok), `sort` (relevance/newest/nearest), `cursor`, `limit` ≤ 50. Każdy wynik ma `match.reasons`/`warnings`, `distance_m` (od środka komórki, zaokrąglony). Brak wyników ⇒ `suggestions` |
 | `GET /v1/reports/areas?bbox=` | agregacja po komórkach siatki dla mapy (liczba, rodzaje) — bez pojedynczych punktów |
 | `GET /v1/reports/{id}` | szczegóły publiczne (właściciel dostaje dodatkowo `private`, liczniki roszczeń, stan indeksowania zdjęć) |
@@ -50,7 +50,7 @@ Publiczna reprezentacja zgłoszenia — **wyłącznie** te pola: `id, kind, stat
 | `GET /v1/reports/{id}/matches` | dopasowania (tylko właściciel): `strong`, `possible`, `weak_count`, `notice` |
 | `GET /v1/reports/{id}/claims` | roszczenia do mojego znaleziska |
 
-Walidacja serwerowa m.in.: kategoria i cechy wg schematu, ≤3 kolory, przedział czasu ≤14 dni i nie w przyszłości, lokalizacja w obszarze pilotażu, brak telefonu/e‑maila/linków w polach publicznych, brak zdjęć przy dokumentach.
+Walidacja serwerowa m.in.: kategoria i cechy wg schematu, ≤3 kolory, przedział czasu ≤14 dni i nie w przyszłości, lokalizacja na obsługiwanym obszarze Polski, brak telefonu/e‑maila/linków w polach publicznych, brak zdjęć przy dokumentach.
 
 ## Roszczenia i rozmowa
 | | |
@@ -84,3 +84,10 @@ Walidacja serwerowa m.in.: kategoria i cechy wg schematu, ≤3 kolory, przedzia�
 | wyszukiwanie zdjęciem | 30/h | 90/h |
 | zgłoszenie nadużycia | 20/doba | 60/doba |
 | wyszukiwanie | — | 1200/h |
+
+## Rozszerzenia 10.11.2026
+
+- `GET /v1/places?q=`: 2–80 znaków; do 20 miejscowości. Wynik `{items:[{key,name,lat,lon,region,county}], attribution}`. Bez autoryzacji; katalog jest lokalny. Współrzędne to środek miejscowości.
+- `GET /v1/reports/areas`: oprócz bbox, rodzaju i kategorii obsługuje `subtype,colors,brand,q,lat,lon,radius_m,date_from,date_to`, zgodnie z listą wyników. Przy oddaleniu zwraca identyfikatory `cluster:…`; grupy powstają wyłącznie z lokalizacji publicznych. Po przybliżeniu wracają komórki siatki.
+- `POST /v1/sessions/recover`: do 64 znaków; nowy kod to 9 grup po 4 znaki (8 losowych + kontrolna), wcześniejsze 5 grup nadal działa. Jedno udane odzyskanie unieważnia stare sesje i kod; współbieżne użycie tego samego kodu nie tworzy drugiej sesji.
+- `GET /v1/claims/{id}` dla znalazcy zwraca też `handover_code_length` (8 dla nowych, 6 dla wcześniejszych spraw). Kod nadal widzi wyłącznie odbiorca.

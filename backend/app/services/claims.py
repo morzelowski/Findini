@@ -228,6 +228,7 @@ def serialize_claim(db: DbSession, claim: Claim, role: str, actor: Actor) -> dic
         out["question"] = r.private.claim_question or GENERIC_QUESTION
         out["secret_details"] = r.private.secret_details
         out["handover_attempts_left"] = max(0, MAX_HANDOVER_ATTEMPTS - claim.handover_attempts)
+        out["handover_code_length"] = len(claim.handover_code) if claim.handover_code else 8
         out["counterpart_alias"] = "Osoba zgłaszająca roszczenie"
     else:
         out["question"] = r.private.claim_question or GENERIC_QUESTION

@@ -127,7 +127,7 @@ fun MyReportScreen(nav: NavController, id: String, snackbar: SnackbarHostState) 
             title = { Text(title) },
             text = { Text(body) },
             confirmButton = {
-                Button(onClick = {
+                Button(shape = MaterialTheme.shapes.small, onClick = {
                     confirm = null
                     when (action) {
                         "withdraw" -> scope.launch {
@@ -222,13 +222,13 @@ private fun OwnerPanel(r: Report, matches: MatchesResponse?, claims: List<Case>?
         HorizontalDivider()
         if (r.status == "active") {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                OutlinedButton(onClick = { onAction(if (r.isFound) "resolve_found" else "resolve_lost") }, modifier = Modifier.weight(1f)) {
+                OutlinedButton(shape = MaterialTheme.shapes.small, onClick = { onAction(if (r.isFound) "resolve_found" else "resolve_lost") }, modifier = Modifier.weight(1f)) {
                     Text(if (r.isFound) "Zamknij sprawę" else "Odnalazłem!")
                 }
-                OutlinedButton(onClick = { onAction("withdraw") }, modifier = Modifier.weight(1f)) { Text("Usuń") }
+                OutlinedButton(shape = MaterialTheme.shapes.small, onClick = { onAction("withdraw") }, modifier = Modifier.weight(1f)) { Text("Usuń") }
             }
         } else if (r.status != "reserved") {
-            OutlinedButton(onClick = { onAction("withdraw") }, modifier = Modifier.fillMaxWidth()) { Text("Usuń zgłoszenie i zdjęcia") }
+            OutlinedButton(shape = MaterialTheme.shapes.small, onClick = { onAction("withdraw") }, modifier = Modifier.fillMaxWidth()) { Text("Usuń zgłoszenie i zdjęcia") }
         }
     }
 }
@@ -243,7 +243,7 @@ fun NotificationPermissionAsk(show: Boolean, done: () -> Unit) {
         onDismissRequest = done,
         title = { Text("Powiadomić Cię o dopasowaniach?") },
         text = { Text("Co ok. 30 minut sprawdzimy nowe zgłoszenia pasujące do Twojego i wiadomości w sprawach. Bez śledzenia lokalizacji.") },
-        confirmButton = { Button(onClick = { launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS) }) { Text("Tak, powiadamiaj") } },
+        confirmButton = { Button(shape = MaterialTheme.shapes.small, onClick = { launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS) }) { Text("Tak, powiadamiaj") } },
         dismissButton = { TextButton(onClick = done) { Text("Nie teraz") } },
     )
 }

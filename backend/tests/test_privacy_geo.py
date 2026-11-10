@@ -85,7 +85,7 @@ def test_radius_filter_and_sorting(client, guest_factory):
 
 def test_outside_pilot_rejected(guest_factory):
     g = guest_factory()
-    r = g.post("/v1/reports", json=report_payload(location={"lat": 52.2297, "lon": 21.0122, "source": "gps"}))
+    r = g.post("/v1/reports", json=report_payload(location={"lat": 48.2082, "lon": 16.3738, "source": "gps"}))
     assert r.status_code == 422 and r.json()["error"]["code"] == "outside_pilot"
 
 

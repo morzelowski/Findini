@@ -165,7 +165,15 @@ data class Pilot(
 )
 
 @Serializable
-data class Landmark(val key: String, val name: String, val lat: Double, val lon: Double)
+data class Landmark(
+    val key: String, val name: String, val lat: Double, val lon: Double,
+    val region: String = "", val county: String = "",
+) {
+    val context: String get() = listOf(region, county).filter { it.isNotBlank() }.joinToString(" · ")
+}
+
+@Serializable
+data class PlacesResponse(val items: List<Landmark> = emptyList())
 
 @Serializable
 data class AiStatus(val status: String)
@@ -303,6 +311,7 @@ data class Case(
     @SerialName("secret_details") val secretDetails: String? = null,
     @SerialName("handover_attempts_left") val handoverAttemptsLeft: Int? = null,
     @SerialName("handover_code") val handoverCode: String? = null,
+    @SerialName("handover_code_length") val handoverCodeLength: Int = 6,
 ) {
     val isFinder: Boolean get() = role == "finder"
 }

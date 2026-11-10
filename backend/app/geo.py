@@ -31,7 +31,7 @@ class PublicArea:
 def _steps() -> tuple[float, float]:
     s = get_settings()
     dlat = s.grid_cell_m / M_PER_DEG_LAT
-    dlon = s.grid_cell_m / (M_PER_DEG_LAT * math.cos(math.radians(s.pilot_center_lat)))
+    dlon = s.grid_cell_m / (M_PER_DEG_LAT * math.cos(math.radians(s.grid_reference_lat)))
     return dlat, dlon
 
 
@@ -46,8 +46,8 @@ def ensure_in_pilot(lat: float, lon: float) -> None:
     if not in_pilot(lat, lon):
         raise invalid(
             "outside_pilot",
-            f"Findini działa obecnie pilotażowo w obszarze: {get_settings().pilot_name} i okolice. "
-            "Wskaż miejsce w tym obszarze.",
+            f"Wskaż miejsce na obsługiwanym obszarze: {get_settings().pilot_name}. "
+            "Możesz wyszukać miejscowość lub przesunąć mapę.",
         )
 
 

@@ -110,13 +110,34 @@ def report_areas(
     category: str | None = Query(default=None, max_length=32),
     date_from: str | None = None,
     date_to: str | None = None,
+    subtype: str | None = Query(default=None, max_length=40),
+    colors: str | None = Query(default=None, max_length=100),
+    brand: str | None = Query(default=None, max_length=40),
+    q: str | None = Query(default=None, max_length=120),
+    lat: float | None = Query(default=None, ge=-90, le=90),
+    lon: float | None = Query(default=None, ge=-180, le=180),
+    radius_m: int | None = Query(default=None, ge=100, le=25000),
     db: DbSession = Depends(get_db),
 ) -> dict[str, Any]:
     box = _bbox(bbox)
     assert box is not None
+    if (lat is None) != (lon is None):
+        raise invalid("bad_location", "Podaj obie współrzędne.")
     return {
         "areas": svc.map_areas(
-            db, bbox=box, kind=kind, category=category, date_from=_dt(date_from, "od"), date_to=_dt(date_to, "do")
+            db,
+            bbox=box,
+            kind=kind,
+            category=category,
+            date_from=_dt(date_from, "od"),
+            date_to=_dt(date_to, "do"),
+            subtype=subtype,
+            colors=[c for c in (colors or "").split(",") if c],
+            brand=brand,
+            q=q,
+            lat=lat,
+            lon=lon,
+            radius_m=radius_m,
         ),
         "note": "Kółka pokazują przybliżone obszary (siatka ok. 500 m), nie dokładne miejsca.",
     }

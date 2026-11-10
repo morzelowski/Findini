@@ -39,7 +39,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(
     title="Findini API",
     version=__version__,
-    description="API aplikacji Findini — zgłaszanie znalezionych przedmiotów i odnajdywanie zgub (pilotaż: Kraków).",
+    description="API aplikacji Findini — zgłaszanie znalezionych przedmiotów i odnajdywanie zgub w całej Polsce.",
     lifespan=lifespan,
 )
 
